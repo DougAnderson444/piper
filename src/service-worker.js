@@ -1,4 +1,5 @@
-import { timestamp, files, shell, routes } from '@sapper/service-worker';
+import { files, shell, routes } from '@sapper/service-worker';
+const timestamp = process.env.SAPPER_TIMESTAMP; // instead of `import { timestamp }`
 
 const ASSETS = `cache${timestamp}`;
 
