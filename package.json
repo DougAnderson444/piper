@@ -1,5 +1,5 @@
 {
-  "name": "sapper-now",
+  "name": "piper-sapper-now",
   "description": "Sapper app deployed to Zeit Now",
   "version": "0.0.1",
   "scripts": {
