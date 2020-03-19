@@ -25,5 +25,7 @@
   },
   "optionalDependencies": {
     "fsevents": "^2.1.2"
-  }
+  },
+  "repository": "https://github.com/DougAnderson444/piper",
+  "license": "MIT"
 }

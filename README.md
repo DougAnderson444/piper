@@ -1,3 +1,11 @@
+# Doug's Notes
+
+Create .env file
+ignore .env in gitignore
+in .env mode=none
+package.json repo and licence
+
+
 # sapper-template
 
 The default [Sapper](https://github.com/sveltejs/sapper) template, available for Rollup and webpack.
