@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "start": "sapper dev",
-    "dev": "sapper dev --port $PORT",
+    "dev": "sapper dev --port 3000",
     "build": "sapper export",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
@@ -13,6 +13,8 @@
   "dependencies": {
     "compression": "^1.7.1",
     "ipfs": "^0.41.2",
+    "it-all": "^1.0.1",
+    "node-forge": "^0.9.1",
     "polka": "next",
     "sirv": "^0.4.0"
   },
