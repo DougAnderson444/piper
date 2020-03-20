@@ -1,11 +1,14 @@
  <script>
-    import { onMount } from 'svelte';
+	// svelte stuff
+	import { onMount } from 'svelte';
+	import { fade, slide } from 'svelte/transition';
+	
+	//stores
 	import { nodeId, nodeAgentVersion, nodeProtocolVersion, ifpsNode, start, keys, rootHash } from './stores.js'
 	import { signMessage, verifySignature } from '../components/pkiHelper.js';
 
+	// IPFS
 	import IPFS from 'ipfs';
-
-	//const all = require('it-all')
 	import all from 'it-all'
 
 	/* Alternatives for auto-pinning
@@ -16,7 +19,7 @@
 	const ipfs = new ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 	*/
 
-	let addedFileHash, addedFileContents, cid = "Pending...";
+	let addedFileContents, addedFileHash= "Pending...";
 	const stringToUse = 'hello world from webpacked IPFS. Love, Douglas.'
 	let node
 	let res
@@ -89,8 +92,9 @@
 		}
 
 		//save as data to DAG
-		cid = await getCID(stringToUse)
-		$rootHash = cid
+		$rootHash = await getCID(stringToUse)
+
+		const pbLink = await node.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
 
 		// example obj
 		const obj = {
@@ -99,11 +103,12 @@
 			c: {
 				ca: [5, 6, 7],
 				cb: 'foo'
-			}
+			},
+			d: pbLink.value._links
 		}
 
 		const treeid = await node.dag.put(obj, { format: 'dag-cbor', hashAlg: 'sha2-256' })
-		console.log(`treeid is \n ${treeid.toString()}`)
+		console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`)
 		// zdpuAmtur968yprkhG9N5Zxn6MFVoqAWBbhUAkNLJs2UtkTq5
 
 		const paths = await all(node.dag.tree(treeid))
@@ -197,28 +202,26 @@
 </style>
  <div class='outer'>
 {#if $nodeId}
-    <h2>IPFS node is running!</h2>
+	<div transition:slide="{{delay: 100, duration: 750}}">
+		<h2>IPFS node is running!</h2>
+		<p>Your ID is <strong>{$nodeId}</strong></p>
+		<p>Your IPFS version is <strong>{$nodeAgentVersion}</strong></p>
+		<p>Your IPFS protocol version is <strong>{$nodeProtocolVersion}</strong></p>
+		<hr />
+	</div>
+{:else}
+<div transition:slide="{{delay: 100, duration: 750}}">
+    <h2>Loading a node for you...</h2>
+</div>
 {/if}
-    <p>Your ID is <strong>{$nodeId}</strong></p>
-    <p>Your IPFS version is <strong>{$nodeAgentVersion}</strong></p>
-    <p>Your IPFS protocol version is <strong>{$nodeProtocolVersion}</strong></p>
-    <hr />
     <div>
         Added a file! <br />
         <a target='_blank' rel="noopener noreferrer" href='https://ipfs.io/ipfs/{addedFileHash}'>{addedFileHash}</a><br />
         <br />Added dag data! <br />
-        <a target='_blank' rel="noopener noreferrer" href='https://explore.ipld.io/#/explore/{cid}'>{cid}</a><br />
-		{#if res}
-		<br />
-		Published to IPNS<br />
-		IPNS publish {res.value} to nodeId: <a target='_blank' rel="noopener noreferrer" href='https://gateway.ipfs.io/ipns/{res.name}'>{res.name}</a>
-		{/if}
+        <a target='_blank' rel="noopener noreferrer" href='https://explore.ipld.io/#/explore/{$rootHash}'>{$rootHash}</a><br />
     </div>
     <p>
         Contents of this file: <br />
         {addedFileContents}
     </p>
-	<p>
-	Did it really come from you-know-who? Check the signature:
-	</p>
 </div>

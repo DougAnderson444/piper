@@ -16,6 +16,7 @@
     "it-all": "^1.0.1",
     "node-forge": "^0.9.1",
     "polka": "next",
+    "qrcode": "^1.4.4",
     "sirv": "^0.4.0"
   },
   "devDependencies": {

@@ -1,7 +1,21 @@
 <script>
+   	import { onMount } from 'svelte';
+    import IpfsComp from '../components/Ipfs.svelte'
+    import UserInterface from '../components/UserInterface.svelte';
+    
+    import { keys } from '../components/stores.js';
 
-	import IpfsComp from '../components/Ipfs.svelte'
+    //	import { PkiHelper } from '../components/pkiHelper.js';
+    import { createKeyPair } from '../components/pkiHelper.js';
 
+    let kp = false;
+
+    onMount(async() => {
+      const password = "my super secret pass phrase that nobody will ever guess"
+      kp = await createKeyPair(password)
+      $keys = kp  // copy to stores
+    })
+  
 </script>
 <style>
      .hero {
@@ -39,3 +53,6 @@
 </div>
 
 <IpfsComp/>
+<br />
+<br />
+<UserInterface />
