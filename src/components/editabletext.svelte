@@ -1,6 +1,6 @@
 <style>     
     .editing {
-        color: rgb(207, 33, 33)
+        color: rgb(207, 33, 33) 
     }
 </style>
 <script>
