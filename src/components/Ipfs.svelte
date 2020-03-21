@@ -4,7 +4,7 @@
 	import { fade, slide } from 'svelte/transition';
 	
 	//stores
-	import { nodeId, nodeAgentVersion, nodeProtocolVersion, ifpsNode, start, keys, rootHash } from './stores.js'
+	import { nodeId, nodeAgentVersion, nodeProtocolVersion, ipfsNode, start, keys, rootHash } from './stores.js'
 	import { signMessage, verifySignature } from '../components/pkiHelper.js';
 
 	// IPFS
@@ -21,7 +21,6 @@
 
 	let addedFileContents, addedFileHash= "Pending...";
 	const stringToUse = 'hello world from webpacked IPFS. Love, Douglas.'
-	let node
 	let res
 	let password = "mysupersecretpasswordhere" 
 	let topic //pubsub topic = $keys.publicKey
@@ -60,13 +59,12 @@
 		//	}
 		// EXPERIMENTAL: { ipnsPubsub: true }
 		} 
-		node = await IPFS.create( options )  
 
-		$ifpsNode = node
+		$ipfsNode = await IPFS.create( options )  
 		$start = new Date()
 		console.log('IPFS node is ready')
 
-		const { id, agentVersion, protocolVersion } = await node.id()
+		const { id, agentVersion, protocolVersion } = await $ipfsNode.id()
 
 		//copy to svelte stores
 		$nodeId = id;
@@ -74,7 +72,7 @@
 		$nodeProtocolVersion = protocolVersion;
 
 		//save as a file to IPFS 
-		for await (const { cid } of node.add(stringToUse)) {
+		for await (const { cid } of $ipfsNode.add(stringToUse)) {
 			addedFileHash = cid.toString()
 
 			//publish to ipns --> Slow AF, unuseable
@@ -83,7 +81,7 @@
 
 			let bufs = []
 
-			for await (const buf of node.cat(cid)) {
+			for await (const buf of $ipfsNode.cat(cid)) {
 				bufs.push(buf)
 			}
 
@@ -94,7 +92,7 @@
 		//save as data to DAG
 		$rootHash = await getCID(stringToUse)
 
-		const pbLink = await node.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
+		const pbLink = await $ipfsNode.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
 
 		// example obj
 		const obj = {
@@ -107,14 +105,14 @@
 			d: pbLink.value._links
 		}
 
-		const treeid = await node.dag.put(obj, { format: 'dag-cbor', hashAlg: 'sha2-256' })
+		const treeid = await $ipfsNode.dag.put(obj, { format: 'dag-cbor', hashAlg: 'sha2-256' })
 		console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`)
 		// zdpuAmtur968yprkhG9N5Zxn6MFVoqAWBbhUAkNLJs2UtkTq5
 
-		const paths = await all(node.dag.tree(treeid))
+		const paths = await all($ipfsNode.dag.tree(treeid))
 		console.log(`tree result is \n ${JSON.stringify(paths)}`)
 
-		const config = await node.config.get()
+		const config = await $ipfsNode.config.get()
 		console.log(`options.config`, config)
 		//console.log(`config.Identity.PrivKey: \n`, config.Identity.PrivKey)  //PeerId PrivKey?
 
@@ -125,21 +123,21 @@
 		*/
 		// test if signature with this private key matches the Public key from the peerid
 
-		const stats = await node.repo.stat()
+		const stats = await $ipfsNode.repo.stat()
 		//console.log(`Repo stats: `,stats)
 
 		//list all ipns keys
-		//const keys = await node.key.list()
+		//const keys = await $ipfsNode.key.list()
 		//console.log(`List all keys: \n `, keys)
 
-		//const pem = await node.key.export('self', password)   // key is for ipns
+		//const pem = await $ipfsNode.key.export('self', password)   // key is for ipns
 		//console.log(`pem is: \n `,pem)
 
 	})
 
 	$: {
-		if(node && $keys && addedFileHash){
-			//console.log(`node and keys ready, let's start listening`)
+		if($ipfsNode && $keys && addedFileHash){
+			//console.log(`$ipfsNode and keys ready, let's start listening`)
 			subscribe().then(console.log(`Successfull subscribed!`)).then(ping())
 			
 		}
@@ -150,12 +148,12 @@
 
 	async function ping(){
 		console.log("Ping!")
-		node.pubsub.publish(topic, pingText)
+		$ipfsNode.pubsub.publish(topic, pingText)
 	}
 
 	async function subscribe(){
 		console.log(`subscribing to ${topic}`)
-		return await node.pubsub.subscribe(topic, receiveMsg)  // return a promise
+		return await $ipfsNode.pubsub.subscribe(topic, receiveMsg)  // return a promise
 	}
 
 	const receiveMsg = (msg) => {
@@ -168,7 +166,7 @@
 			const msgSignature = signMessage(addedFileHash, $keys.privateKey) 
 			const msgObj = {data: addedFileHash, sig: msgSignature}
 			const msgString = JSON.stringify(msgObj)
-			node.pubsub.publish(topic, msgString)
+			$ipfsNode.pubsub.publish(topic, msgString)
 		}else{
 			console.log(`got acutal data: \n ${JSON.parse(msg.data.toString())} `)
 			
@@ -185,7 +183,7 @@
 	async function getCID(data) {
 		try{ 
 	//console.log(`CID based on ${JSON.stringify(data)} ${JSON.stringify(data.toString())}`)
-	const cidVal = await node.dag.put(data) //use DAG for object storage
+	const cidVal = await $ipfsNode.dag.put(data) //use DAG for object storage
 	//console.log(`${JSON.stringify(data)} CID= ${JSON.stringify(cidVal.toString())}`)
 	return cidVal
 		}catch(e){

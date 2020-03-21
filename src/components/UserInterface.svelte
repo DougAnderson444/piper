@@ -1,6 +1,7 @@
 <script>
 	import Folder from "./Folder.svelte";
-	
+	import AddPeer from './AddPeer.svelte';
+		
 	let root = [
 	  {
 	    type: "folder",
@@ -92,6 +93,11 @@
 	  }
       
 	];
+
+	//check localstorage for publicKey
+	//if key(s), offer as option(s)
+	//if not, ask for input of public key
+	//password?
 </script>
 <style>
     div.outer {
@@ -102,4 +108,5 @@
 
 <div class='outer'>
 <Folder name="Portfolio" files={root} expanded head={true} />
+<AddPeer />
 </div>
