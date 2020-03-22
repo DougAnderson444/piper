@@ -2,20 +2,22 @@
    	import { onMount } from 'svelte';
     import IpfsComp from '../components/Ipfs.svelte'
     import UserInterface from '../components/UserInterface.svelte';
-    
-    import { keys } from '../components/stores.js';
+    import utils from '../components/utils.js'
+
+    import { keys, ipfsNode, portfolio } from '../components/stores.js';
 
     //	import { PkiHelper } from '../components/pkiHelper.js';
     import { createKeyPair } from '../components/pkiHelper.js';
 
     let kp = false;
+    let loaded
 
     onMount(async() => {
       const password = "my super secret pass phrase that nobody will ever guess"
       kp = await createKeyPair(password)
       $keys = kp  // copy to stores
     })
-  
+
 </script>
 <style>
      .hero {
@@ -55,4 +57,8 @@
 <IpfsComp/>
 <br />
 <br />
-<UserInterface />
+{#if $ipfsNode}
+  <UserInterface />
+  {:else}
+  Loading node...
+{/if}

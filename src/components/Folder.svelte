@@ -9,8 +9,8 @@
 
 	export let expanded = false;
 	export let head
-	export let name;
-	export let files;
+	export let name
+	export let items;
 
 	let fill;
 
@@ -60,12 +60,12 @@
 
 {#if expanded}
 	<ul transition:slide|local>
-		{#each files as file}
+		{#each items as item} 
 			<li>
-				{#if file.type === 'folder'}
-					<svelte:self {...file}/>
+				{#if item.hasOwnProperty("key")}
+					<svelte:self name={item.key} items={item.value} head={false} />
 				{:else}
-					<div class:expanded ><InfoCard {...file} /></div>
+					<div class:expanded ><InfoCard items={item} /></div>
 				{/if}
 			</li>
 		{/each}

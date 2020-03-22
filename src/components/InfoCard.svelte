@@ -3,9 +3,11 @@
 	//import Fa from "svelte-fa";
     //import { faFlag, faPlus, faCertificate, faUserCheck } from "@fortawesome/free-solid-svg-icons";
     
-    export let name;
-    export let value;
+    export let items;
 	export let certified = false;
+	if(items && items.hasOwnProperty("certified") && items.certified===true) certified = true;
+
+	console.log(`Info Card items: ${items}`)
 
 </script>
 
@@ -28,16 +30,19 @@
       color: limegreen !important;
 	}
 </style>
-
+{#if !items.id}
+{items}
+{:else}
 <article class="contact-card">
 	<h3>
-			<span><EditableText placeholder={name} /></span> <span class:certified>*<!--Fa icon={faCertificate} /--></span>
+			<span><EditableText placeholder={items.name} /></span> <span class:certified>*<!--Fa icon={faCertificate} /--></span>
 	</h3>
 
 	<div class="value">
 		<slot name="value">
-			<span><EditableText placeholder={value} /></span>
+			<span><EditableText placeholder={items.id} /></span>
 		</slot>
 	</div>
 
 </article>
+{/if}

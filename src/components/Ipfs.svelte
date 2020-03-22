@@ -44,8 +44,9 @@
 		// console.log('Component has Mounted')
 		// name the repository, repository saved in the browser's IndexedDB
 		// https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs#ipfs-constructor
+		
 		const options = { 
-			repo: "Douglas", // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
+			repo: "ipfs", // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
 			pass: password, //, // https://github.com/ipfs/js-ipfs/issues/1138
 			libp2p: {
 				config: {
@@ -53,11 +54,11 @@
 						enabled: true
 					}
 				}
-			}
+			},
+			EXPERIMENTAL: { ipnsPubsub: true }
 		//	init: {				// only runs initially
 		//		privateKey: "", // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
 		//	}
-		// EXPERIMENTAL: { ipnsPubsub: true }
 		} 
 
 		$ipfsNode = await IPFS.create( options )  
@@ -76,7 +77,7 @@
 			addedFileHash = cid.toString()
 
 			//publish to ipns --> Slow AF, unuseable
-			//res = await node.name.publish( `/ipfs/${addedFileHash}`)
+			//res = await $ipfsNode.name.publish( `/ipfs/${addedFileHash}`)
 			//console.log(`IPNS publish ${res.value} to nodeId: https://gateway.ipfs.io/ipns/${res.name}`)
 
 			let bufs = []
@@ -90,7 +91,7 @@
 		}
 
 		//save as data to DAG
-		$rootHash = await getCID(stringToUse)
+		//$rootHash = await getCID(stringToUse)
 
 		const pbLink = await $ipfsNode.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
 
@@ -106,14 +107,14 @@
 		}
 
 		const treeid = await $ipfsNode.dag.put(obj, { format: 'dag-cbor', hashAlg: 'sha2-256' })
-		console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`)
+		//console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`)
 		// zdpuAmtur968yprkhG9N5Zxn6MFVoqAWBbhUAkNLJs2UtkTq5
 
 		const paths = await all($ipfsNode.dag.tree(treeid))
-		console.log(`tree result is \n ${JSON.stringify(paths)}`)
+		///console.log(`tree result is \n ${JSON.stringify(paths)}`)
 
 		const config = await $ipfsNode.config.get()
-		console.log(`options.config`, config)
+		//console.log(`options.config`, config)
 		//console.log(`config.Identity.PrivKey: \n`, config.Identity.PrivKey)  //PeerId PrivKey?
 
 		// https://github.com/ipfs/js-ipfs/blob/447b44d1b64714f5ed0cafba166ad0a4dbbb587c/packages/ipfs/src/core/components/init.js
@@ -147,34 +148,34 @@
 	$: topic = $keys.publicKey
 
 	async function ping(){
-		console.log("Ping!")
+		//console.log("Ping!")
 		$ipfsNode.pubsub.publish(topic, pingText)
 	}
 
 	async function subscribe(){
-		console.log(`subscribing to ${topic}`)
+		//console.log(`subscribing to ${topic}`)
 		return await $ipfsNode.pubsub.subscribe(topic, receiveMsg)  // return a promise
 	}
 
 	const receiveMsg = (msg) => {
-		console.log(`Pubsub Msg rx'd: \n ${msg.data.toString()} `)
+		//console.log(`Pubsub Msg rx'd: \n ${msg.data.toString()} `)
 		
 		if(msg.data.toString() == pingText){
 			// respond by broadcasting the r00t hash
-			console.log(`respond by broadcasting the r00t hash \n ${addedFileHash} \nto topic \n ${topic} `)
+			//console.log(`respond by broadcasting the r00t hash \n ${addedFileHash} \nto topic \n ${topic} `)
 			// sign the msg, so they know it's legit
 			const msgSignature = signMessage(addedFileHash, $keys.privateKey) 
 			const msgObj = {data: addedFileHash, sig: msgSignature}
 			const msgString = JSON.stringify(msgObj)
 			$ipfsNode.pubsub.publish(topic, msgString)
 		}else{
-			console.log(`got acutal data: \n ${JSON.parse(msg.data.toString())} `)
+			//console.log(`got acutal data: \n ${JSON.parse(msg.data.toString())} `)
 			
 			const msgObj = JSON.parse(msg.data)
-			console.log(`check the signature: \n Does ${JSON.parse(msg.data.toString()).data} \n Signature: ${JSON.parse(msg.data.toString()).sig}\nmatch ${$keys.publicKey}`)
+			//console.log(`check the signature: \n Does ${JSON.parse(msg.data.toString()).data} \n Signature: ${JSON.parse(msg.data.toString()).sig}\nmatch ${$keys.publicKey}`)
 
 			const legit = verifySignature(msgObj.data, msgObj.sig, $keys.publicKey)
-			console.log(`legit? ${legit} `)
+			//console.log(`legit? ${legit} `)
 		}
 
 	}
@@ -213,13 +214,14 @@
 </div>
 {/if}
     <div>
-        Added a file! <br />
+         Contents of this file: <br />
+        {addedFileContents} <br />       
+		Added a test file! <br />
         <a target='_blank' rel="noopener noreferrer" href='https://ipfs.io/ipfs/{addedFileHash}'>{addedFileHash}</a><br />
-        <br />Added dag data! <br />
+        <br />DAG roothash is: <br />
         <a target='_blank' rel="noopener noreferrer" href='https://explore.ipld.io/#/explore/{$rootHash}'>{$rootHash}</a><br />
     </div>
     <p>
-        Contents of this file: <br />
-        {addedFileContents}
+
     </p>
 </div>
