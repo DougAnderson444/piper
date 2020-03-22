@@ -1,29 +1,22 @@
-# Sapper Example
+# Peer Piper Demo [WIP: Work in Progress]
 
-This directory is a brief example of a [Sapper](https://sapper.svelte.dev/) app that can be deployed with ZEIT Now and zero configuration.
+This repo is a brief example of a [PeerPiper](https://peerpiper.io/) in action, that can be deployed with ZEIT Now and zero configuration.
 
-## Deploy Your Own
+## Deploy Your Own Server, with one click
 
-Deploy your own Sapper project with ZEIT Now.
+Don't want to run on our server? No problem! Deploy your own project with ZEIT Now.
 
-[![Deploy with ZEIT Now](https://zeit.co/button)](https://zeit.co/import/project?template=https://github.com/zeit/now/tree/master/examples/sapper)
+[![Deploy with ZEIT Now](https://zeit.co/button)](https://zeit.co/import/project?template=https://github.com/DougAnderson444/piper)
 
-_Live Example: https://sapper.now-examples.now.sh_
+_Live Example: https://peersapper.douganderson444.now.sh_
 
-### How We Created This Example
+### How We Created This Demo
 
-To get started with Sapper deployed with ZEIT Now, you can use [degit](https://github.com/Rich-Harris/degit) to initialize the project:
+In the end, we need to get to a place where we can:
 
-```shell
-$ npx degit "sveltejs/sapper-template#webpack" my-sapper-app
+```javascript
+import peerpiper from 'peerpiper'
+let peerProfile = peerpiper(userPeerID)  // Returns an object for th user's profile
 ```
 
-> The only change made is to change the build script in `package.json` to be `"sapper export"`.
-
-### Deploying From Your Terminal
-
-You can deploy your new Sapper project with a single command from your terminal using [Now CLI](https://zeit.co/download):
-
-```shell
-$ now
-```
+Not quite there yet but we're working on it.
