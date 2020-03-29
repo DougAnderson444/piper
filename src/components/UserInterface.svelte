@@ -2,38 +2,68 @@
     import { onMount } from 'svelte';
 	import Folder from "./Folder.svelte";
 	import AddPeer from './AddPeer.svelte';
-	import { rootHash, ipfsNode, portfolio } from './stores.js'
+	import { rootHash, ipfsNode, portfolio, profile } from './stores.js'
 
 	if(typeof window !== 'undefined' && localStorage.getItem('rootHash') && localStorage.getItem('rootHash')!=0 ){
 		// IPFS node rootHash stored, let's pull it up
 		let someData = localStorage.getItem('rootHash')
-		console.log(`local storage: ${someData}`)
+		//console.log(`local storage: ${someData}`)
 		$rootHash = someData;
 		
 		(async()=>{
 			// dag.get returns an IPLD format node
 			$portfolio = (await $ipfsNode.dag.get($rootHash)).value; 
-			console.log(`New portfolio is ${JSON.stringify($portfolio)}`)
+			//console.log(`New portfolio is ${JSON.stringify($portfolio)}`)
 		})();
 	}else{
 		// load a default template
-		let uuids = [
-					"123", 
-					"456",
-					"678"
-					];
-		let settings = []
+		let uuids = [];
+		let contact = [
+			{key: "Name", value:"Bob"},
+			{key: "Phone", value:"555-555-1234"}
+			]
+/*
+Scheme rules
+Profile is a list = Array
+each item in the list is an object
+first key in the object is the title of the object
+the value assoc with the first key can be a simple value, or another array
+the object can have tags, but array items cannot have tags (they'd have to become objects)
+*/
+		let $profile = [
+			{"Favorite Color(s)":["Blue"], tags: ["car", "dress shirt"] },
+			{"Links":[
+				{"Brave": "https://brave.com/dou750"}, 
+				"Communications"
+				], tags: ["resume", "skills"] },
+			{"Skills":[
+				{"skill": "Presentation"}, 
+				{"skill": "Communications"}
+				], tags: ["resume", "skills"] },
+			{"Experiences":[
+				{"Naval Officer":[
+					{"Start":"1997","Finish":"2017", "Employer":"Royal Canadian Navy"}
+					]},
+				{"Public Service":["2017-2019","Dept National Defence"]}
+				], tags: ["resume", "experience"] },
+			{"Contact Details":[
+				{"Phone":["Mobile","613-555-1234"], tags:["preferred"]},
+				{"Phone":["Office","819-555-1234"], tags:["voicemail"]},
+				{"email":"doug@peerpiper.io"}
+				], tags: ["resume", "experience"] },
+			] 
 
 		$portfolio = [
-			{ key: "uuids", value: uuids },
-			{ key: "Settings", value: settings }
+			{ profile: profile },
+			{ key: "uuids", 		value: uuids, tags: [] },
+			{ key: "Contact Info", 	value: contact, tags: []  }
 		];
 	}
 	// run this function any time the portfolio changes
 	$:(async()=>{
 		// save initial portfolio to IPFS
 		if($portfolio!=0){
-			console.log(`updating rootHash for new portfolio ${JSON.stringify($portfolio)}`)
+			//console.log(`updating rootHash for new portfolio ${JSON.stringify($portfolio)}`)
 			$rootHash = await $ipfsNode.dag.put($portfolio, { pin: true })
 		}
 	})()

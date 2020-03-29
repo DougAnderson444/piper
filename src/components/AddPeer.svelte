@@ -6,16 +6,10 @@
 
     let visible = false;
     let peerID = '';
-    let checking = '';
-    function checkIPFS(peerID){
-        if(peerID.length == 44 && !checking){
-            // check netowrk for this peerID
-            checking = "checking..."
-        }
-    }
+
     const handleInput = async(e) => {
         // if peerID is 44 char long, then add it to the peer ID List 
-        if((peerID+'').length == 3) {
+        if((peerID+'').length == 44) {
 
             $portfolio.forEach((segment, index)=>{ 
                 if(segment.key == "uuids"){

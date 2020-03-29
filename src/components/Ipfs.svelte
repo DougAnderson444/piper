@@ -3,6 +3,9 @@
 	import { onMount } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	
+	import { stores } from '@sapper/app';
+	const  { page, session } = stores();
+
 	//stores
 	import { nodeId, nodeAgentVersion, nodeProtocolVersion, ipfsNode, start, keys, rootHash } from './stores.js'
 	import { signMessage, verifySignature } from '../components/pkiHelper.js';
@@ -11,7 +14,7 @@
 	import IPFS from 'ipfs';
 	import all from 'it-all'
 
-	/* Alternatives for auto-pinning
+	/* Alternatives, for auto-pinning
 	const IPFS = require('ipfs-mini'); // https://github.com/SilentCicero/ipfs-mini
 	const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 	// or
@@ -38,15 +41,29 @@
 	},
 	"Datastore": { ... 
 	*/
-
+	//defaults
+	let privKey = null
+	let modifier = ""
+	let repo = 'ipfs'
+	if($page.query.repo)
+	{
+		modifier = $page.query.repo
+		repo += modifier
+		console.log(`repo: ${repo}`)
+		
+	}
+	if(typeof window !== 'undefined' && localStorage.getItem('peerId'+modifier)){
+		privKey = localStorage.getItem('peerId'+modifier)
+	}
 	onMount(async() => {
 		// from ipfs browser-webpack
 		// console.log('Component has Mounted')
 		// name the repository, repository saved in the browser's IndexedDB
 		// https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs#ipfs-constructor
-		
+
+
 		const options = { 
-			repo: "ipfs", // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
+			repo: "ipfs"+modifier, // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
 			pass: password, //, // https://github.com/ipfs/js-ipfs/issues/1138
 			libp2p: {
 				config: {
@@ -55,10 +72,10 @@
 					}
 				}
 			},
-			EXPERIMENTAL: { ipnsPubsub: true }
-		//	init: {				// only runs initially
-		//		privateKey: "", // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
-		//	}
+			EXPERIMENTAL: { ipnsPubsub: true },
+			init: {				// only runs initially
+				privateKey: privKey, // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
+			}
 		} 
 
 		$ipfsNode = await IPFS.create( options )  
@@ -114,6 +131,7 @@
 		///console.log(`tree result is \n ${JSON.stringify(paths)}`)
 
 		const config = await $ipfsNode.config.get()
+		localStorage.setItem('peerId'+modifier, config.Identity.PrivKey)
 		//console.log(`options.config`, config)
 		//console.log(`config.Identity.PrivKey: \n`, config.Identity.PrivKey)  //PeerId PrivKey?
 
@@ -202,26 +220,18 @@
  <div class='outer'>
 {#if $nodeId}
 	<div transition:slide="{{delay: 100, duration: 750}}">
-		<h2>IPFS node is running!</h2>
-		<p>Your ID is <strong>{$nodeId}</strong></p>
-		<p>Your IPFS version is <strong>{$nodeAgentVersion}</strong></p>
-		<p>Your IPFS protocol version is <strong>{$nodeProtocolVersion}</strong></p>
+		<h2>Your node is running in the browser.</h2>
+		<!--p>Your browser server ID is: <strong>{$nodeId}</strong></p>
 		<hr />
 	</div>
+	<div>
+        Your current DAG roothash is: <br />
+        <a target='_blank' rel="noopener noreferrer" href='https://explore.ipld.io/#/explore/{$rootHash}'>{$rootHash}</a><br /-->
+    </div>
 {:else}
 <div transition:slide="{{delay: 100, duration: 750}}">
-    <h2>Loading a node for you...</h2>
+    <h2>Loading your peer node...</h2>
 </div>
 {/if}
-    <div>
-         Contents of this file: <br />
-        {addedFileContents} <br />       
-		Added a test file! <br />
-        <a target='_blank' rel="noopener noreferrer" href='https://ipfs.io/ipfs/{addedFileHash}'>{addedFileHash}</a><br />
-        <br />DAG roothash is: <br />
-        <a target='_blank' rel="noopener noreferrer" href='https://explore.ipld.io/#/explore/{$rootHash}'>{$rootHash}</a><br />
-    </div>
-    <p>
 
-    </p>
 </div>

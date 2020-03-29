@@ -50,7 +50,9 @@
 		<h1 class="title">PeerPiper.io</h1>
 	</center>
 	<p class="description"> 
-		Your ultimate personal data sink. Save once, pipe out to your selected peer groups.
+		Your ultimate personal data sink. Save once, pipe out to your selected peer groups.<br>
+    Connect with friends and businesses to automagically sync data for easier life and better christmas gifts.<br>
+    It's like being continuously registered for gifts with every business you meet.
 	</p>
 </div>
 

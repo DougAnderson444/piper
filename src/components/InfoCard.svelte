@@ -30,17 +30,17 @@
       color: limegreen !important;
 	}
 </style>
-{#if !items.id}
+{#if !items.key}
 {items}
 {:else}
 <article class="contact-card">
 	<h3>
-			<span><EditableText placeholder={items.name} /></span> <span class:certified>*<!--Fa icon={faCertificate} /--></span>
+			<span><EditableText placeholder={items.key} /></span> <span class:certified>*<!--Fa icon={faCertificate} /--></span>
 	</h3>
 
 	<div class="value">
 		<slot name="value">
-			<span><EditableText placeholder={items.id} /></span>
+			<span><EditableText placeholder={items.value} /></span>
 		</slot>
 	</div>
 

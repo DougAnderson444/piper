@@ -29,20 +29,26 @@ canvas {
     z-index:1;
 }
 span {
-    display: inline;
+    display: inline-block;
+}
+
+.peerspan {
+    border: 1px solid #aaa;
+    padding: 1em;
+    margin: 1em;
 }
 
 </style>
 {#if $keys}
-    <span>
-        <Clipboard value={$keys.publicKey}/>
-    </span>
+    
+    Connect using: <span class="peerspan" >{$keys.publicKey}<Clipboard value={$keys.publicKey}/>
+    </span><span on:mouseover={()=>{showQR()}} >[QR Code]</span>
     <br/>
-        <span on:mouseover={()=>{showQR()}} >[Show Your Peer ID QR Code]</span>    
+            
     <canvas hidden={!visible} transition:fade on:mousemove={()=>{visible = !visible}}
         bind:this={canvas}
         width={32}
         height={32}
     ></canvas>
-
+<hr>
 {/if}

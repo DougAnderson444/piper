@@ -7,8 +7,8 @@
 	//import Fa from "svelte-fa";
 	//import { faFlag, faPlus, faCertificate, faUserCheck, faEllipsisH, faAngleUp, faQrcode, faCopy, faLink } from "@fortawesome/free-solid-svg-icons";
 
-	export let expanded = false;
-	export let head
+	export let expanded = false; // default, override is in parent component
+	export let head = false;
 	export let name
 	export let items;
 
@@ -62,7 +62,7 @@
 	<ul transition:slide|local>
 		{#each items as item} 
 			<li>
-				{#if item.hasOwnProperty("key")}
+				{#if item.hasOwnProperty("key") && typeof (item.value) !== 'string' }
 					<svelte:self name={item.key} items={item.value} head={false} />
 				{:else}
 					<div class:expanded ><InfoCard items={item} /></div>
