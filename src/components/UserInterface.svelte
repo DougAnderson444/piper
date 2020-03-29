@@ -7,7 +7,7 @@
 	if(typeof window !== 'undefined' && localStorage.getItem('rootHash') && localStorage.getItem('rootHash')!=0 ){
 		// IPFS node rootHash stored, let's pull it up
 		let someData = localStorage.getItem('rootHash')
-		//console.log(`local storage: ${someData}`)
+		console.log(`local storage: ${someData}`)
 		$rootHash = someData;
 		
 		(async()=>{
@@ -17,11 +17,7 @@
 		})();
 	}else{
 		// load a default template
-		let uuids = [];
-		let contact = [
-			{key: "Name", value:"Bob"},
-			{key: "Phone", value:"555-555-1234"}
-			]
+
 /*
 Scheme rules
 Profile is a list = Array
@@ -30,7 +26,13 @@ first key in the object is the title of the object
 the value assoc with the first key can be a simple value, or another array
 the object can have tags, but array items cannot have tags (they'd have to become objects)
 */
-		let $profile = [
+		let uuids = [];
+		let contact = [
+			{key: "Name", value:"Bob"},
+			{key: "Phone", value:"555-555-1234"}
+			]
+
+		$profile = [
 			{"Favorite Color(s)":["Blue"], tags: ["car", "dress shirt"] },
 			{"Links":[
 				{"Brave": "https://brave.com/dou750"}, 
@@ -52,19 +54,26 @@ the object can have tags, but array items cannot have tags (they'd have to becom
 				{"email":"doug@peerpiper.io"}
 				], tags: ["resume", "experience"] },
 			] 
-
+/*
 		$portfolio = [
 			{ profile: profile },
 			{ key: "uuids", 		value: uuids, tags: [] },
 			{ key: "Contact Info", 	value: contact, tags: []  }
 		];
+*/
+
+		$portfolio = [
+			{ profile: $profile },
+			{ key: "uuids", value: uuids }
+		];
+
 	}
 	// run this function any time the portfolio changes
 	$:(async()=>{
 		// save initial portfolio to IPFS
 		if($portfolio!=0){
-			//console.log(`updating rootHash for new portfolio ${JSON.stringify($portfolio)}`)
-			$rootHash = await $ipfsNode.dag.put($portfolio, { pin: true })
+			console.log(`updating rootHash for new portfolio ${JSON.parse(JSON.stringify($portfolio))}`)
+			$rootHash = await $ipfsNode.dag.put(JSON.parse(JSON.stringify($portfolio))) //, { pin: true }
 		}
 	})()
 

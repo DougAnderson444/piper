@@ -73,9 +73,9 @@
 				}
 			},
 			EXPERIMENTAL: { ipnsPubsub: true },
-			init: {				// only runs initially
-				privateKey: privKey, // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
-			}
+			//init: {				// only runs initially
+				//privateKey: privKey, // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
+			//}
 		} 
 
 		$ipfsNode = await IPFS.create( options )  
@@ -110,7 +110,7 @@
 		//save as data to DAG
 		//$rootHash = await getCID(stringToUse)
 
-		const pbLink = await $ipfsNode.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
+		//const pbLink = await $ipfsNode.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
 
 		// example obj
 		const obj = {
@@ -119,12 +119,12 @@
 			c: {
 				ca: [5, 6, 7],
 				cb: 'foo'
-			},
-			d: pbLink.value._links
+			}
+			//,d: pbLink.value._links
 		}
 
-		const treeid = await $ipfsNode.dag.put(obj, { format: 'dag-cbor', hashAlg: 'sha2-256' })
-		//console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`)
+		const treeid = await $ipfsNode.dag.put(obj) //, { format: 'dag-cbor', hashAlg: 'sha2-256' }
+		console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`)
 		// zdpuAmtur968yprkhG9N5Zxn6MFVoqAWBbhUAkNLJs2UtkTq5
 
 		const paths = await all($ipfsNode.dag.tree(treeid))
@@ -155,9 +155,9 @@
 	})
 
 	$: {
-		if($ipfsNode && $keys && addedFileHash){
-			//console.log(`$ipfsNode and keys ready, let's start listening`)
-			subscribe().then(console.log(`Successfull subscribed!`)).then(ping())
+		if($ipfsNode && $keys!=0 && addedFileHash){
+			console.log(`$ipfsNode and keys= ${$keys} let's start listening`)
+			//subscribe().then(console.log(`Successfull subscribed!`)).catch((err)=>{console.log("Error subscribing, ", err)}).then(ping())
 			
 		}
 	}
@@ -171,8 +171,12 @@
 	}
 
 	async function subscribe(){
-		//console.log(`subscribing to ${topic}`)
-		return await $ipfsNode.pubsub.subscribe(topic, receiveMsg)  // return a promise
+		console.log(`subscribing to ${topic}`)
+		try{
+			return await $ipfsNode.pubsub.subscribe(topic, receiveMsg)  // return a promise
+		}catch{
+			return new Error("error"); //throw 
+		}
 	}
 
 	const receiveMsg = (msg) => {
@@ -224,9 +228,9 @@
 		<!--p>Your browser server ID is: <strong>{$nodeId}</strong></p>
 		<hr />
 	</div>
-	<div>
+	<div-->
         Your current DAG roothash is: <br />
-        <a target='_blank' rel="noopener noreferrer" href='https://explore.ipld.io/#/explore/{$rootHash}'>{$rootHash}</a><br /-->
+        <a target='_blank' rel="noopener noreferrer" href='https://explore.ipld.io/#/explore/{$rootHash}'>{$rootHash}</a><br />
     </div>
 {:else}
 <div transition:slide="{{delay: 100, duration: 750}}">
