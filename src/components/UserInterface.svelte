@@ -44,7 +44,9 @@ the object can have tags, but array items cannot have tags (they'd have to becom
 				], tags: ["resume", "skills"] },
 			{"Experiences":[
 				{"Naval Officer":[
-					{"Start":"1997","Finish":"2017", "Employer":"Royal Canadian Navy"}
+					{"Start":"1997",
+					 "Finish":"2017", 
+					 "Employer":"Royal Canadian Navy"}
 					]},
 				{"Public Service":["2017-2019","Dept National Defence"]}
 				], tags: ["resume", "experience"] },
