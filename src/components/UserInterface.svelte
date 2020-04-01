@@ -1,8 +1,9 @@
 <script>
     import { onMount } from 'svelte';
 	import Folder from "./Folder.svelte";
+	import ObjectComp from "./ObjectComp.svelte";
 	import AddPeer from './AddPeer.svelte';
-	import { rootHash, ipfsNode, portfolio, profile } from './stores.js'
+	import {root, rootHash, ipfsNode, portfolio, profile } from './stores.js'
 
 	if(typeof window !== 'undefined' && localStorage.getItem('rootHash') && localStorage.getItem('rootHash')!=0 ){
 		// IPFS node rootHash stored, let's pull it up
@@ -99,3 +100,7 @@ the object can have tags, but array items cannot have tags (they'd have to becom
 {:else}
   Loading portfolio...?
 {/if}
+
+<p>
+	<ObjectComp name="Cats" bind:props={$root} expanded />
+</p>
