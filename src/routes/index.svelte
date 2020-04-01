@@ -42,6 +42,7 @@
 </style>
 <svelte:head>
 	<title>PeerPiper.io - Save once, Pipe to Peers anytime</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </svelte:head>
 
 <div class="hero">

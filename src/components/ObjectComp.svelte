@@ -3,10 +3,12 @@
   import EditableText from "./EditableText.svelte";
   import { root } from "./stores.js";
 
-  export let props; //root at first
+  export let props; //root
   export let breadcrumbs = [];
   export let expanded = false;
   export let name;
+  //console.log(`props is ${JSON.stringify(props)}`);
+  //props["Cat 1"] = "Symba"; // works at the top only
 
   function toggle() {
     expanded = !expanded;
@@ -15,7 +17,6 @@
 
 <style>
 	span {
-	  padding: 0 0 0 0em;
 	  background: url(tutorial/icons/folder.svg) 0 0.1em no-repeat;
 	  background-size: 1em 1em;
 	  font-weight: bold;
@@ -25,7 +26,13 @@
 	.expanded {
 	  background-image: url(tutorial/icons/folder-open.svg);
 	}
-
+	.expanded:before {
+	  content: "\f07c";
+	  font: normal normal normal 0.75em/1 FontAwesome;
+	  color: #ccc;
+	  padding: 0.2em 0 0 0em;
+	  margin: 0.2em;
+	}
 	ul {
 	  padding: 0.2em 0 0 0em;
 	  margin: 0 0 0 0em;
@@ -37,9 +44,17 @@
 	  padding: 0.2em 0;
 	  margin: 0.15em 1em;
 	}
+
+	.selectdiv:before {
+	  content: "\f07b";
+	  font: normal normal normal 0.75em/1 FontAwesome;
+	  color: #ccc;
+	  padding-right: 0.1em;
+	  margin-right: 0em;
+	}
 </style>
 
-<span class:expanded on:click={toggle}><EditableText bind:value={name}/></span>
+<span class:selectdiv={!expanded}></span> <span class:expanded on:click={toggle}><EditableText bind:value={name}/></span>
 				
 {#if expanded}
 
@@ -49,9 +64,10 @@
 			{#if typeof val === 'object'}
 				<svelte:self props={val} name={key} breadcrumbs={breadcrumbs.concat(key)} />
 			{:else}
-                <KeyValue {breadcrumbs} {key} {val} />
+        <KeyValue {breadcrumbs} {key} {val} />
 			{/if}
 		</li>
 	{/each}
+	<li>+</li>
 </ul>
 {/if}
