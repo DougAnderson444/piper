@@ -30,16 +30,19 @@ export const elapsed = derived(
 	([$time, $start]) => Math.max(Math.round(($time - $start) / 1000),0)
 );
 
-let cats = {
-	"Cat 1": {
-	  "cat 1A": "Keyboard",
-	  description: {
-		NewCat: "joe",
-		MoreCat: { FatCat: "Maru" }
-	  }
+let def = {
+	Cats: {
+	  "Cat 1": {
+		"cat 1A": "Keyboard",
+		description: {
+		  NewCat: "joe",
+		  MoreCat: { FatCat: "Maru" }
+		}
+	  },
+	  "Cat 2": { "cat 2": "MaruTwo" },
+	  "Cat 3": { "cat 3": "Henri The Existential Cat" }
 	},
-	"Cat 2": { "cat 2": "MaruTwo" },
-	"Cat 3": { "cat 3": "Henri The Existential Cat" }
+	Dogs: {}
   };
   
-  export const root = writable(cats);
+  export const root = writable(def);

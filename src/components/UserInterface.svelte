@@ -101,6 +101,8 @@ the object can have tags, but array items cannot have tags (they'd have to becom
   Loading portfolio...?
 {/if}
 
-<p>
-	<ObjectComp name="Cats" bind:props={$root} expanded />
-</p>
+{#each [...Object.entries($root)] as [key, val]}
+	<p>
+		<ObjectComp breadcrumbs={[key]} {key} {val} expanded />
+	</p>
+{/each}

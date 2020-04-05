@@ -6,11 +6,9 @@
   export let val;
   export let breadcrumbs = [];
 
-  $: {
     //console.log(`crumbs: ${breadcrumbs.concat(keys)} vals:${vals}`);
-    drill($root, breadcrumbs.concat(key), val);
+//    drill($root, breadcrumbs.concat(key), val);
     //console.log(`root is ${JSON.stringify($root, null, 2)}`);
-  }
 
   // Drill down into the object until reach key:value pair
   function drill(obj, crumbs, value) {

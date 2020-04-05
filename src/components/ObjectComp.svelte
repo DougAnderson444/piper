@@ -3,12 +3,12 @@
   import EditableText from "./EditableText.svelte";
   import { root } from "./stores.js";
 
-  export let props; //root
   export let breadcrumbs = [];
+  export let key;
+  export let val;
   export let expanded = false;
-  export let name;
-  //console.log(`props is ${JSON.stringify(props)}`);
-  //props["Cat 1"] = "Symba"; // works at the top only
+  //console.log(`key is ${JSON.stringify(key)}`);
+  //key["Cat 1"] = "Symba"; // works at the top only
 
   function toggle() {
     expanded = !expanded;
@@ -54,17 +54,20 @@
 	}
 </style>
 
-<span class:selectdiv={!expanded}></span> <span class:expanded on:click={toggle}><EditableText bind:value={name}/></span>
+<span class:selectdiv={!expanded}></span>
+<span class:expanded on:click={toggle}>
+	<EditableText bind:value={key}/>
+</span>
 				
 {#if expanded}
 
 <ul>
-	{#each [...Object.entries(props)] as [key, val]}
+	{#each [...Object.entries(val)] as [key, val]}
 		<li>
 			{#if typeof val === 'object'}
-				<svelte:self props={val} name={key} breadcrumbs={breadcrumbs.concat(key)} />
+				<svelte:self {key} {val} breadcrumbs={breadcrumbs.concat(key)} />
 			{:else}
-        <KeyValue {breadcrumbs} {key} {val} />
+        		<KeyValue {key} {val}  breadcrumbs={breadcrumbs.concat(key)} />
 			{/if}
 		</li>
 	{/each}
