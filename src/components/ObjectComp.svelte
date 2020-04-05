@@ -58,7 +58,7 @@
 
 <span class:selectdiv={!expanded} />
 <span class:expanded on:click={toggle}>
-  <EditableText bind:value={key} />
+  <KeyValue {key} val={{}} breadcrumbs={breadcrumbs.concat(key)} />
 </span>
 
 {#if expanded}

@@ -1,51 +1,64 @@
-<style>     
-    .editing {
-        color: rgb(207, 33, 33) 
-    }
-</style>
 <script>
+  // Save
+  import { tick } from "svelte";
+  import { start } from "./stores.js";
+  import { createEventDispatcher } from "svelte";
 
-// Save
-import { tick } from 'svelte';
-import { start } from './stores.js';
+  // Properties (Props)
+  export let value = "";
+  export let type = "text";
+  export let placeholder = "Double-Click to Edit";
+  export let labelClasses = "";
+  export let inputClasses = "";
 
-// Properties (Props)
-export let value = '';
-export let type = 'text';
-export let placeholder = 'Double-Click to Edit';
-export let labelClasses = '';
-export let inputClasses = '';
-let editing = false;
-let inputEl;
-let label;
+  const dispatch = createEventDispatcher();
 
-// Computed
-$: isText = type === 'text';
-$: isNumber = type === 'number';
-$: if (isNumber) {
-      label = value === '' ? placeholder : value;
-    } else if (isText) {
-      label = value ? value : placeholder;
-    }
-const toggle = async (_) => {
-  editing = !editing;
-  if (editing) {
-    await tick();
-    inputEl.focus();
+  let editing = false;
+  let inputEl;
+  let label;
+
+  // Computed
+  $: isText = type === "text";
+  $: isNumber = type === "number";
+  $: if (isNumber) {
+    label = value === "" ? placeholder : value;
+  } else if (isText) {
+    label = value ? value : placeholder;
   }
-};
-const handleInput = (e) => {
-  value = isNumber ? +e.target.value : e.target.value;
-};
-const handleEnter = (e) => {
-  if (e.keyCode === 13) inputEl.blur();
-};
-const handleBlur = (_) => {
-  toggle();
-};
+  const toggle = async _ => {
+    editing = !editing;
+    if (editing) {
+      await tick();
+      inputEl.focus();
+    } else {
+      // was editing, now not editing
+      doneEditing();
+    }
+  };
+  const handleInput = e => {
+    value = isNumber ? +e.target.value : e.target.value;
+  };
+  const handleEnter = e => {
+    if (e.keyCode === 13) inputEl.blur();
+  };
+  const handleBlur = _ => {
+    toggle();
+  };
+
+  function doneEditing() {
+    dispatch("doneEditing");
+    console.log("Done Editing");
+  }
 </script>
+
+<style>
+  .editing {
+    color: rgb(207, 33, 33);
+  }
+</style>
+
 {#if editing && (isText || isNumber)}
-  <input 
+  <input
     class={inputClasses}
     bind:this={inputEl}
     {type}
@@ -54,12 +67,9 @@ const handleBlur = (_) => {
     on:input={handleInput}
     on:keyup={handleEnter}
     on:blur={handleBlur}
-    on:keydown={()=> {$start = new Date()}} 
-    >
+    on:keydown={() => {
+      $start = new Date();
+    }} />
 {:else}
-  <span 
-    class={labelClasses}
-    on:dblclick={toggle}>
-  {label}
-  </span>
+  <span class={labelClasses} on:dblclick={toggle}>{label}</span>
 {/if}
