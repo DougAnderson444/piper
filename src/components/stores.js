@@ -33,11 +33,11 @@ export const elapsed = derived(
 let def = {
 	Cats: {
 	  "Cat 1": {
-		"cat 1A": "Keyboard",
 		description: {
 		  NewCat: "joe",
 		  MoreCat: { FatCat: "Maru" }
-		}
+		},
+		"cat 1A": "Keyboard"
 	  },
 	  "Cat 2": { "cat 2": "MaruTwo" },
 	  "Cat 3": { "cat 3": "Henri The Existential Cat" }

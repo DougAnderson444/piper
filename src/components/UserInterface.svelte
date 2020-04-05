@@ -5,6 +5,16 @@
 	import AddPeer from './AddPeer.svelte';
 	import {root, rootHash, ipfsNode, portfolio, profile } from './stores.js'
 
+	let sproot;  //spread root
+	$:{ 
+		sproot = [...Object.entries($root)] 
+		console.log(`sproot...`)
+	}
+	let testt;
+	$:{ 
+		testt = $root 
+		console.log(`testt...`)
+	}
 	if(typeof window !== 'undefined' && localStorage.getItem('rootHash') && localStorage.getItem('rootHash')!=0 ){
 		// IPFS node rootHash stored, let's pull it up
 		let someData = localStorage.getItem('rootHash')
@@ -101,7 +111,7 @@ the object can have tags, but array items cannot have tags (they'd have to becom
   Loading portfolio...?
 {/if}
 
-{#each [...Object.entries($root)] as [key, val]}
+{#each sproot as [key, val]}
 	<p>
 		<ObjectComp breadcrumbs={[key]} {key} {val} expanded />
 	</p>

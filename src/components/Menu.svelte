@@ -8,9 +8,6 @@
 	let key;
 	export let entry = {};
 
-	console.log(
-	  `breadcrumbs: ${breadcrumbs} and breadcrumbs.length = ${breadcrumbs.length}`
-	);
 	if (breadcrumbs.length - 1 > 0) {
 	  key = `New in ${breadcrumbs[breadcrumbs.length - 1]}`;
 	} else {
@@ -25,20 +22,23 @@
 	function toggleMenu() {
 	  menu = !menu;
 	}
-	const closeMenu = () => {
-	  menu = false;
+	function closeMenu() {
+      menu = false;
+      console.log(`closing menu`)
 	};
 	const handleEnter = e => {
 	  if (e.keyCode === 13) folderText.blur();
 	};
 	const newfolder = () => {
         // breadcrumbs must include the "New Key" folder name
+        entry.val = "New Folder"
+        closeMenu();
         drill($root, breadcrumbs.concat(["New Folder"]))
-        closeMenu;
         console.log(`new root is ${JSON.stringify($root, null, 2)}`);
+        $root = $root //necessary for main page to refresh values
     };
     const newfile = () => {
-        closeMenu;
+        closeMenu();
     }
     function drill(obj, crumbs, value = {}) {
         if (crumbs.length > 1) {
@@ -71,7 +71,7 @@
 	<!-- entry[.key, .val] = (self && false) || (Key && Value) -->
 	<span on:click={newfolder}>New Folder in {key}</span>
 	<br>(or)<br> 
-	<span on:click={newfile}}>New File in {key}</span>
+	<span on:click={newfile}>New File in {key}</span>
 	
 <button hidden={!menu} on:click={closeMenu} >x</button>
 
