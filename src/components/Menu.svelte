@@ -24,7 +24,6 @@
   }
   function closeMenu() {
     menu = false;
-    console.log(`closing menu`);
   }
   const handleEnter = e => {
     if (e.keyCode === 13) folderText.blur();
@@ -38,6 +37,9 @@
     $root = $root; //necessary for main page to refresh values
   };
   const newfile = () => {
+    drill($root, breadcrumbs.concat(["New Entry"]), "New Value");
+    console.log(`new root is ${JSON.stringify($root, null, 2)}`);
+    $root = $root; //necessary for main page to refresh values
     closeMenu();
   };
   function drill(obj, crumbs, value = {}) {
@@ -96,8 +98,7 @@
   <br style="clear:all;" />
   <div>
     <span on:click={newfolder}>New Folder in {key}</span>
-    <br />
-    <center>(or)</center>
+    <br />(or)<br />
     <span on:click={newfile}>New File in {key}</span>
   </div>
 
