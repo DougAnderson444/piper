@@ -21,21 +21,25 @@
 
 <style>
   span {
-    background: url(tutorial/icons/folder.svg) 0 0.1em no-repeat;
     background-size: 1em 1em;
     font-weight: bold;
     cursor: pointer;
   }
 
-  .expanded {
-    background-image: url(tutorial/icons/folder-open.svg);
-  }
   .expanded:before {
     content: "\f07c";
-    font: normal normal normal 0.75em/1 FontAwesome;
+    font: normal normal normal 1.5em/1 FontAwesome;
     color: #ccc;
-    padding: 0.2em 0 0 0em;
-    margin: 0.2em;
+    padding-right: 0.1em;
+    margin-right: 0.1em;
+  }
+
+  .menuclosed:before {
+    content: "\f07b";
+    font: normal normal normal 1.5em/1 FontAwesome;
+    color: #ccc;
+    padding-right: 0.1em;
+    margin-right: 0.1em;
   }
   ul {
     padding: 0.2em 0 0 0em;
@@ -48,17 +52,9 @@
     padding: 0.2em 0;
     margin: 0.15em 1em;
   }
-
-  .selectdiv:before {
-    content: "\f07b";
-    font: normal normal normal 0.75em/1 FontAwesome;
-    color: #ccc;
-    padding-right: 0.1em;
-    margin-right: 0em;
-  }
 </style>
 
-<span class:selectdiv={!expanded} />
+<span class:menuclosed={!expanded} on:click={toggle} />
 <span class:expanded on:click={toggle}>
   <ShowKey {key} {breadcrumbs} />
 </span>
@@ -77,6 +73,5 @@
         {/if}
       </li>
     {/each}
-    <li>+</li>
   </ul>
 {/if}
