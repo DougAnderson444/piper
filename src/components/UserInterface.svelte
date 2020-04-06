@@ -7,7 +7,7 @@
 
 	let sproot;  //spread root
 	$:{ 
-		sproot = [...Object.entries($root)] 
+		sproot = [...Object.entries($root).sort()] 
 		console.log(`sproot...`)
 	}
 	let testt;

@@ -1,5 +1,7 @@
 <script>
-  import KeyValue from "./KeyValue.svelte";
+  //import KeyValue from "./KeyValue.svelte";
+  import ShowKey from "./ShowKey.svelte";
+  import ShowValue from "./ShowValue.svelte";
   import EditableText from "./EditableText.svelte";
   import Menu from "./Menu.svelte";
   import { root } from "./stores.js";
@@ -58,18 +60,20 @@
 
 <span class:selectdiv={!expanded} />
 <span class:expanded on:click={toggle}>
-  <KeyValue {key} val={{}} breadcrumbs={breadcrumbs.concat(key)} />
+  <ShowKey {key} {breadcrumbs} />
 </span>
 
 {#if expanded}
-<Menu {breadcrumbs} bind:entry />
+  <Menu {breadcrumbs} bind:entry />
   <ul>
-    {#each [...Object.entries(val)] as [key, val]}
+    {#each [...Object.entries(val).sort()] as [key, val]}
       <li>
         {#if typeof val === 'object'}
           <svelte:self {key} {val} breadcrumbs={breadcrumbs.concat(key)} />
         {:else}
-          <KeyValue {key} {val} breadcrumbs={breadcrumbs.concat(key)} />
+          <ShowKey {key} breadcrumbs={breadcrumbs.concat(key)} />
+          :
+          <ShowValue {val} breadcrumbs={breadcrumbs.concat(key)} />
         {/if}
       </li>
     {/each}

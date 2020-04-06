@@ -1,22 +1,14 @@
 <script>
-  // Save
   import { tick } from "svelte";
-  import { start } from "./stores.js";
-  import { createEventDispatcher } from "svelte";
-
-  // Properties (Props)
+  // Props
   export let value = "";
   export let type = "text";
-  export let placeholder = "Double-Click to Edit";
+  export let placeholder = "";
   export let labelClasses = "";
   export let inputClasses = "";
-
-  const dispatch = createEventDispatcher();
-
   let editing = false;
   let inputEl;
   let label;
-
   // Computed
   $: isText = type === "text";
   $: isNumber = type === "number";
@@ -25,14 +17,11 @@
   } else if (isText) {
     label = value ? value : placeholder;
   }
-  const toggle = async _ => {
+  const toggle = async (event) => {
     editing = !editing;
     if (editing) {
       await tick();
       inputEl.focus();
-    } else {
-      // was editing, now not editing
-      doneEditing();
     }
   };
   const handleInput = e => {
@@ -42,20 +31,12 @@
     if (e.keyCode === 13) inputEl.blur();
   };
   const handleBlur = _ => {
-    toggle();
+    if(value!="" && value != null)
+      toggle();
+    else
+      value="Enter Value"
   };
-
-  function doneEditing() {
-    dispatch("doneEditing");
-    console.log("Done Editing");
-  }
 </script>
-
-<style>
-  .editing {
-    color: rgb(207, 33, 33);
-  }
-</style>
 
 {#if editing && (isText || isNumber)}
   <input
@@ -66,10 +47,7 @@
     {placeholder}
     on:input={handleInput}
     on:keyup={handleEnter}
-    on:blur={handleBlur}
-    on:keydown={() => {
-      $start = new Date();
-    }} />
+    on:blur={handleBlur} />
 {:else}
-  <span class={labelClasses} on:dblclick={toggle}>{label}</span>
+  <span contenteditable class={labelClasses} on:input={toggle} >{label}</span>
 {/if}
