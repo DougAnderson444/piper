@@ -1,20 +1,34 @@
- <script>
-	// svelte stuff
-	import { onMount } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
-	
-	import { stores } from '@sapper/app';
-	const  { page, session } = stores();
+<script>
+  // svelte stuff
+  import { onMount } from "svelte";
+  import { fade, slide } from "svelte/transition";
 
-	//stores
-	import { nodeId, nodeAgentVersion, nodeProtocolVersion, ipfsNode, start, keys, rootHash } from './stores.js'
-	import { signMessage, verifySignature } from '../components/pkiHelper.js';
+  //  for url/path/params/query: https://sapper.svelte.dev/docs#Argument
+  import { stores } from "@sapper/app";
+  const { page, session } = stores();
 
-	// IPFS
-	import IPFS from 'ipfs';
-	import all from 'it-all'
+  //stores
+  import {
+    nodeId,
+    nodeAgentVersion,
+    nodeProtocolVersion,
+    ipfsNode,
+    start,
+    rootHash,
+    myProfile,
+    testProfiles
+  } from "./stores.js";
 
-	/* Alternatives, for auto-pinning
+  import { createKeyPair, signMessage, verifySignature } from "./pkiHelper.js";
+
+  // IPFS
+  import IPFS from "ipfs";
+  import all from "it-all";
+
+  // Profile object
+  import Profile from "../utils/Profile.js";
+
+  /* Alternatives, for auto-pinning
 	const IPFS = require('ipfs-mini'); // https://github.com/SilentCicero/ipfs-mini
 	const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 	// or
@@ -22,16 +36,13 @@
 	const ipfs = new ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 	*/
 
-	let addedFileContents, addedFileHash= "Pending...";
-	const stringToUse = 'hello world from webpacked IPFS. Love, Douglas.'
-	let res
-	let password = "mysupersecretpasswordhere" 
-	let topic //pubsub topic = $keys.publicKey
-	const pingText = "Ping!"
-	let graph
+  let addedFileContents,
+    addedFileHash = "Pending...";
+  const stringToUse = "hello world from webpacked IPFS. Love, Douglas.";
 
-	/*
-	keys in IPFS
+  let password = "";
+
+  /*
 	~/.ipfs/config only contains the identity key of the local IPFS node.
 	{
 	"Identity": {
@@ -41,201 +52,190 @@
 	},
 	"Datastore": { ... 
 	*/
-	//defaults
-	let privKey = null
-	let modifier = ""
-	let repo = 'ipfs'
-	if($page.query.repo)
-	{
-		modifier = $page.query.repo
-		repo += modifier
-		console.log(`repo: ${repo}`)
-		
+
+  //defaults
+  // https://sapper.svelte.dev/docs#Argument
+  /*
+	URL is /blog/some-post?foo=bar&baz, the following would be true:
+		page.path === '/blog/some-post'
+		page.params.slug === 'some-post'
+		page.query.foo === 'bar'
+		page.query.baz === true
+	*/
+  let privKey = null; // to load a known PeerId
+  let modifier = "";
+  let repo = "ipfs";
+  if ($page.query.repo) {
+    modifier = $page.query.repo;
+    repo += modifier;
+    console.log(`repo: ${repo}`);
+  }
+  if (
+    typeof window !== "undefined" &&
+    localStorage.getItem("peerId" + modifier)
+  ) {
+    privKey = localStorage.getItem("peerId" + modifier);
+  }
+  onMount(async () => {
+    // from ipfs browser-webpack
+    // name the repository, repository saved in the browser's IndexedDB
+    // https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs#ipfs-constructor
+
+    const options = {
+      repo: "ipfs" + modifier, // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
+      pass: password, //, // https://github.com/ipfs/js-ipfs/issues/1138
+      libp2p: {
+        config: {
+          pubsub: {
+            enabled: true
+          }
+        }
+      },
+      EXPERIMENTAL: { ipnsPubsub: true }
+      //init: {				// only runs initially
+      //privateKey: privKey, // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
+      //}
+    };
+
+    /*
+     * START IPFS NODE
+     */
+    $ipfsNode = await IPFS.create(options);
+    $start = new Date();
+
+    const { id, agentVersion, protocolVersion } = await $ipfsNode.id();
+
+    //copy to svelte stores
+    $nodeId = id;
+    $nodeAgentVersion = agentVersion;
+    $nodeProtocolVersion = protocolVersion;
+
+    //save as a whole file to IPFS
+    /*
+    for await (const { cid } of $ipfsNode.add(stringToUse)) {
+      addedFileHash = cid.toString();
+
+      //publish to ipns --> Slow AF, unuseable
+      //res = await $ipfsNode.name.publish( `/ipfs/${addedFileHash}`)
+      //console.log(`IPNS publish ${res.value} to nodeId: https://gateway.ipfs.io/ipns/${res.name}`)
+
+      let bufs = [];
+
+      for await (const buf of $ipfsNode.cat(cid)) {
+        bufs.push(buf);
+      }
+
+      const data = Buffer.concat(bufs);
+      addedFileContents = data.toString("utf8");
 	}
-	if(typeof window !== 'undefined' && localStorage.getItem('peerId'+modifier)){
-		privKey = localStorage.getItem('peerId'+modifier)
-	}
-	onMount(async() => {
-		// from ipfs browser-webpack
-		// console.log('Component has Mounted')
-		// name the repository, repository saved in the browser's IndexedDB
-		// https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs#ipfs-constructor
+	*/
 
+    //const pbLink = await $ipfsNode.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
 
-		const options = { 
-			repo: "ipfs"+modifier, // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
-			pass: password, //, // https://github.com/ipfs/js-ipfs/issues/1138
-			libp2p: {
-				config: {
-					pubsub: {
-						enabled: true
-					}
-				}
-			},
-			EXPERIMENTAL: { ipnsPubsub: true },
-			//init: {				// only runs initially
-				//privateKey: privKey, // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
-			//}
-		} 
+    // example obj
+    /*
+    const obj = {
+      a: 1,
+      b: [1, 2, 3],
+      c: {
+        ca: [5, 6, 7],
+        cb: "foo"
+      }
+      //,d: pbLink.value._links
+	};
+	*/
 
-		$ipfsNode = await IPFS.create( options )  
-		$start = new Date()
-		console.log('IPFS node is ready')
+    //const treeid = await $ipfsNode.dag.put(obj); //, { format: 'dag-cbor', hashAlg: 'sha2-256' }
+    //console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`);
+    // zdpuAmtur968yprkhG9N5Zxn6MFVoqAWBbhUAkNLJs2UtkTq5
 
-		const { id, agentVersion, protocolVersion } = await $ipfsNode.id()
+    //const paths = await all($ipfsNode.dag.tree(treeid));
+    ///console.log(`tree result is \n ${JSON.stringify(paths)}`)
 
-		//copy to svelte stores
-		$nodeId = id;
-		$nodeAgentVersion = agentVersion;
-		$nodeProtocolVersion = protocolVersion;
+    const config = await $ipfsNode.config.get();
+    localStorage.setItem("peerId" + modifier, config.Identity.PrivKey);
+    //console.log(`options.config`, config)
+    //console.log(`config.Identity.PrivKey: \n`, config.Identity.PrivKey)  //PeerId PrivKey?
 
-		//save as a file to IPFS 
-		for await (const { cid } of $ipfsNode.add(stringToUse)) {
-			addedFileHash = cid.toString()
-
-			//publish to ipns --> Slow AF, unuseable
-			//res = await $ipfsNode.name.publish( `/ipfs/${addedFileHash}`)
-			//console.log(`IPNS publish ${res.value} to nodeId: https://gateway.ipfs.io/ipns/${res.name}`)
-
-			let bufs = []
-
-			for await (const buf of $ipfsNode.cat(cid)) {
-				bufs.push(buf)
-			}
-
-			const data = Buffer.concat(bufs)
-			addedFileContents =  data.toString('utf8')
-		}
-
-		//save as data to DAG
-		//$rootHash = await getCID(stringToUse)
-
-		//const pbLink = await $ipfsNode.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
-
-		// example obj
-		const obj = {
-			a: 1,
-			b: [1, 2, 3],
-			c: {
-				ca: [5, 6, 7],
-				cb: 'foo'
-			}
-			//,d: pbLink.value._links
-		}
-
-		const treeid = await $ipfsNode.dag.put(obj) //, { format: 'dag-cbor', hashAlg: 'sha2-256' }
-		console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`)
-		// zdpuAmtur968yprkhG9N5Zxn6MFVoqAWBbhUAkNLJs2UtkTq5
-
-		const paths = await all($ipfsNode.dag.tree(treeid))
-		///console.log(`tree result is \n ${JSON.stringify(paths)}`)
-
-		const config = await $ipfsNode.config.get()
-		localStorage.setItem('peerId'+modifier, config.Identity.PrivKey)
-		//console.log(`options.config`, config)
-		//console.log(`config.Identity.PrivKey: \n`, config.Identity.PrivKey)  //PeerId PrivKey?
-
-		// https://github.com/ipfs/js-ipfs/blob/447b44d1b64714f5ed0cafba166ad0a4dbbb587c/packages/ipfs/src/core/components/init.js
-		/* 	config.Identity = {
+    // https://github.com/ipfs/js-ipfs/blob/447b44d1b64714f5ed0cafba166ad0a4dbbb587c/packages/ipfs/src/core/components/init.js
+    /* 	config.Identity = {
 				PeerID: peerId.toB58String(),
 				PrivKey: peerId.privKey.bytes.toString('base64')
 		*/
-		// test if signature with this private key matches the Public key from the peerid
+    // test if signature with this private key matches the Public key from the peerid
 
-		const stats = await $ipfsNode.repo.stat()
-		//console.log(`Repo stats: `,stats)
+    const stats = await $ipfsNode.repo.stat();
+    //console.log(`Repo stats: `,stats)
 
-		//list all ipns keys
-		//const keys = await $ipfsNode.key.list()
-		//console.log(`List all keys: \n `, keys)
+    //list all ipns myProfile
+    //const myProfile = await $ipfsNode.key.list()
+    //console.log(`List all myProfile: \n `, myProfile)
 
-		//const pem = await $ipfsNode.key.export('self', password)   // key is for ipns
-		//console.log(`pem is: \n `,pem)
+    //const pem = await $ipfsNode.key.export('self', password)   // key is for ipns
+    //console.log(`pem is: \n `,pem)
 
-	})
+    //setup some test publicmyProfile, and published responses
+    //make a few public myProfile
+    for (let i = 0; i < 3; i++) {
+      //str = str + i;
+      const password = String(Math.random() + Date.now() + i);
+      let temp = new Profile(password);
+      $testProfiles = [...$testProfiles, temp]; // copy to stores
+    }
+  });
 
-	$: {
-		if($ipfsNode && $keys!=0 && addedFileHash){
-			console.log(`$ipfsNode and keys= ${$keys} let's start listening`)
-			//subscribe().then(console.log(`Successfull subscribed!`)).catch((err)=>{console.log("Error subscribing, ", err)}).then(ping())
-			
-		}
-	}
-	
-	//Subscribe to PublicKey Topic on pubsub once node is ready and keys are ready
-	$: topic = $keys.publicKey
+  $: {
+    if ($ipfsNode && $myProfile != 0) {
+      //console.log(`$ipfsNode and myProfile= ${$myProfile} let's start listening`);
+      $myProfile.subscribe($myProfile.publicKey).then(() => {
+		console.log(`ipfs pinging $myProfile.publicKey ${$myProfile.publicKey}`)
+		$myProfile.ping($myProfile.publicKey);
+      });
+    }
+  }
 
-	async function ping(){
-		//console.log("Ping!")
-		$ipfsNode.pubsub.publish(topic, pingText)
-	}
+  // returns content id (CID)
+  async function getCID(data) {
+    try {
+      //console.log(`CID based on ${JSON.stringify(data)} ${JSON.stringify(data.toString())}`)
+      const cidVal = await $ipfsNode.dag.put(data); //use DAG for object storage
+      //console.log(`${JSON.stringify(data)} CID= ${JSON.stringify(cidVal.toString())}`)
+      return cidVal;
+    } catch (e) {
+      return e;
+    }
+  }
+</script>
 
-	async function subscribe(){
-		console.log(`subscribing to ${topic}`)
-		try{
-			return await $ipfsNode.pubsub.subscribe(topic, receiveMsg)  // return a promise
-		}catch{
-			return new Error("error"); //throw 
-		}
-	}
-
-	const receiveMsg = (msg) => {
-		//console.log(`Pubsub Msg rx'd: \n ${msg.data.toString()} `)
-		
-		if(msg.data.toString() == pingText){
-			// respond by broadcasting the r00t hash
-			//console.log(`respond by broadcasting the r00t hash \n ${addedFileHash} \nto topic \n ${topic} `)
-			// sign the msg, so they know it's legit
-			const msgSignature = signMessage(addedFileHash, $keys.privateKey) 
-			const msgObj = {data: addedFileHash, sig: msgSignature}
-			const msgString = JSON.stringify(msgObj)
-			$ipfsNode.pubsub.publish(topic, msgString)
-		}else{
-			//console.log(`got acutal data: \n ${JSON.parse(msg.data.toString())} `)
-			
-			const msgObj = JSON.parse(msg.data)
-			//console.log(`check the signature: \n Does ${JSON.parse(msg.data.toString()).data} \n Signature: ${JSON.parse(msg.data.toString()).sig}\nmatch ${$keys.publicKey}`)
-
-			const legit = verifySignature(msgObj.data, msgObj.sig, $keys.publicKey)
-			//console.log(`legit? ${legit} `)
-		}
-
-	}
-
-	// returns content id (CID)
-	async function getCID(data) {
-		try{ 
-	//console.log(`CID based on ${JSON.stringify(data)} ${JSON.stringify(data.toString())}`)
-	const cidVal = await $ipfsNode.dag.put(data) //use DAG for object storage
-	//console.log(`${JSON.stringify(data)} CID= ${JSON.stringify(cidVal.toString())}`)
-	return cidVal
-		}catch(e){
-			return e
-		}
-	}
-
- </script>
 <style>
-    div.outer {
-		outline: 1px solid lightgray;
-		padding: 15px;
-	}
+  div.outer {
+    outline: 1px solid lightgray;
+    padding: 15px;
+  }
 </style>
- <div class='outer'>
-{#if $nodeId}
-	<div transition:slide="{{delay: 100, duration: 750}}">
-		<h2>Your node is running in the browser.</h2>
-		<!--p>Your browser server ID is: <strong>{$nodeId}</strong></p>
+
+<div class="outer">
+  {#if $nodeId}
+    <div transition:slide={{ delay: 100, duration: 750 }}>
+      <h2>Your node is running in the browser.</h2>
+      <!--p>Your browser server ID is: <strong>{$nodeId}</strong></p>
 		<hr />
 	</div>
 	<div-->
-        Your current DAG roothash is: <br />
-        <a target='_blank' rel="noopener noreferrer" href='https://explore.ipld.io/#/explore/{$rootHash}'>{$rootHash}</a><br />
+      Your current DAG roothash is:
+      <br />
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://explore.ipld.io/#/explore/{$rootHash}">
+        {$rootHash}
+      </a>
+      <br />
     </div>
-{:else}
-<div transition:slide="{{delay: 100, duration: 750}}">
-    <h2>Loading your peer node...</h2>
-</div>
-{/if}
+  {:else}
+    <div transition:slide={{ delay: 100, duration: 750 }}>
+      <h2>Loading your peer node...</h2>
+    </div>
+  {/if}
 
 </div>

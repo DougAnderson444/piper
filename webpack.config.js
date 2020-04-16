@@ -32,7 +32,7 @@ module.exports = {
 						options: {
 							dev,
 							hydratable: true,
-							hotReload: true // pending https://github.com/sveltejs/svelte/issues/2377
+							hotReload: false // pending https://github.com/sveltejs/svelte/issues/2377
 						}
 					}
 				}

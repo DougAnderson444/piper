@@ -9,8 +9,15 @@
 
 const posts = [
 	{
+		title: 'Throwing your hat in the ring.',
+		slug: 'hat-in-ring',
+		html: `
+			<p>Throw your hat in the ring: participate. Save your data to PP and see how you rank! In real time.</p>
+
+		`
+	},	{
 		title: 'Forget Big Data. Micro Data is a gold mine.',
-		slug: 'what-is-sapper',
+		slug: 'forget-big-data',
 		html: `
 			<p>Forget Big Data. Micro Data is a gold mine.</p>
 
@@ -19,7 +26,7 @@ const posts = [
 
 	{
 		title: 'Building a more reactive internet',
-		slug: 'how-to-use-sapper',
+		slug: 'more-reative',
 		html: `
 			<h2>Step one</h2>
 			<p>Create a new internet, using IPFS and Svelte:</p>
@@ -29,7 +36,7 @@ const posts = [
 
 	{
 		title: 'Peer-to-Peer should be free.',
-		slug: 'why-the-name',
+		slug: 'why-the-free',
 		html: `
 			<p>Peer-to-Peer should be free.</p>
 
@@ -38,7 +45,7 @@ const posts = [
 
 	{
 		title: 'The end of spam: Pull messaging (instead of pushed email)',
-		slug: 'how-is-sapper-different-from-next',
+		slug: 'how-is-pull-different-from-msg',
 		html: `
 			<p>The end of spam: Pull messaging (instead of pushed email)</p>
 

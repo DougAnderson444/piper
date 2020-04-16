@@ -8,7 +8,7 @@
 	if(typeof window !== 'undefined' && localStorage.getItem('rootHash') && localStorage.getItem('rootHash')!=0 ){
 		// IPFS node rootHash stored, let's pull it up
 		let someData = localStorage.getItem('rootHash')
-		console.log(`local storage: ${someData}`)
+		//console.log(`local storage: ${someData}`)
 		$rootHash = someData;
 		
 		(async()=>{
@@ -75,7 +75,7 @@ the object can have tags, but array items cannot have tags (they'd have to becom
 	$:(async()=>{
 		// save initial portfolio to IPFS
 		if($portfolio!=0){
-			console.log(`updating rootHash for new portfolio ${JSON.parse(JSON.stringify($portfolio))}`)
+			//console.log(`updating rootHash for new portfolio ${JSON.parse(JSON.stringify($portfolio))}`)
 			$rootHash = await $ipfsNode.dag.put(JSON.parse(JSON.stringify($portfolio))) //, { pin: true }
 		}
 	})()

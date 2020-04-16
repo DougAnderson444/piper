@@ -7,7 +7,7 @@
 	export let certified = false;
 	if(items && items.hasOwnProperty("certified") && items.certified===true) certified = true;
 
-	console.log(`Info Card items: ${items}`)
+	//console.log(`Info Card items: ${items}`)
 
 </script>
 

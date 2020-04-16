@@ -1,4 +1,7 @@
 <script>
+/*
+Deprecated, replaced with ShowKey and ShowValue components
+*/
   import EditableText from "./EditableText.svelte";
   import { root } from "./stores.js";
 

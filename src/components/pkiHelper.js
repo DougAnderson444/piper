@@ -2,6 +2,8 @@
 import forge from 'node-forge'
 var ed25519 = forge.pki.ed25519;
 
+// pki.publicKeyToPem(publicKey);
+
 //forge.options.usePureJavaScript = true;
 //https://github.com/digitalbazaar/forge/issues/535
 
