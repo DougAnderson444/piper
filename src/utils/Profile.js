@@ -40,16 +40,20 @@ class Profile {
     let node = get(ipfsNode);
 
     try {
-			let res = await node.pubsub.publish(this.publicKey, JSON.stringify(msgObj)); // return a promise
-			console.log(`Successfull published ${msg} to ${this.publicKey}! ${res}`)
-			return res
-
-    } catch {
-			console.log("Error subscribing, ", err);
+      let res = await node.pubsub.publish(
+        this.publicKey,
+        JSON.stringify(msgObj)
+      ); // return a promise
+      console.log(
+        `Successfull published ${msgString} to ${this.publicKey}! ${res}`
+      );
+      return res;
+    } catch (err) {
+      console.log("Error subscribing, ", err);
       return new Error(err); //throw
-		}
+    }
   }
-	
+
   async subscribe(topic) {
     //set up subscription to listen to pings on this public key
     let node = get(ipfsNode);
@@ -71,19 +75,19 @@ class Profile {
         const msgObj = JSON.parse(msg.data);
 
         /*
-			console.log(
-							`check the signature: \n Does ${
-									JSON.parse(msg.data.toString()).data
-							} \n Signature: ${JSON.parse(msg.data.toString()).sig}\nmatch ${
-									msg.topicIDs[0]
-							}`
-			);
-			*/
+        console.log(
+                `check the signature: \n Does ${
+                    JSON.parse(msg.data.toString()).data
+                } \n Signature: ${JSON.parse(msg.data.toString()).sig}\nmatch ${
+                    msg.topicIDs[0]
+                }`
+        );
+        */
         const legit = verifySignature(msgObj.data, msgObj.sig, msg.topicIDs[0]);
         console.log(`legit: ${legit} `);
       }
-		}
-		
+    };
+
     try {
       let res = await node.pubsub.subscribe(topic, receiveMsg); // return a promise
       console.log(`Successfull subscribed to ${topic}! res; ${res} `);
@@ -91,8 +95,7 @@ class Profile {
     } catch (err) {
       console.log("Error subscribing, ", err);
       return new Error(err); //throw
-		}
-		
+    }
   }
 }
 

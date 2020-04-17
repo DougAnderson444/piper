@@ -2,30 +2,17 @@
   import { onMount } from "svelte";
   import IpfsComp from "../components/Ipfs.svelte";
   import UserInterface from "../components/UserInterface.svelte";
-  import utils from "../components/utils.js";
-
   import { myProfile, ipfsNode, portfolio } from "../components/stores.js";
-
-  //	import { PkiHelper } from '../components/pkiHelper.js';
-  import { createKeyPair } from "../components/pkiHelper.js";
-    import Profile from "../utils/Profile.js";
+  import Profile from "../utils/Profile.js";
 
   //  for url/path/params/query: https://sapper.svelte.dev/docs#Argument
   import { stores } from "@sapper/app";
   const { page, session } = stores();
 
-  let kp = false;
-  let loaded;
-
   onMount(async () => {
     const password = "my super secret pass phrase that nobody will ever guess";
-    $myProfile = await new Profile(password)
-    console.log(`profile created: ${JSON.stringify($myProfile.publicKey)}`)
-    
-    /*
-      kp = await createKeyPair(password);
-      $keys = kp; // copy to stores
-    */
+    $myProfile = await new Profile(password);
+    console.log(`profile created: ${JSON.stringify($myProfile.publicKey)}`);
   });
 </script>
 
@@ -95,6 +82,7 @@
 {#if page.query}
   <p>Query is: {page.query}</p>
 {/if}
--->
+
 <p>Query is: {JSON.stringify($page.query)}</p>
 <p>Query is: {JSON.stringify($page.query.user)}</p>
+-->

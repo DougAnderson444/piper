@@ -64,15 +64,17 @@
     height={32} />
   <br />
   Add test friends
-  <br />
-  {#each $testProfiles as test, index}
-    {index + 1}:
-    <span class="peerspan">
-      {test.publicKey}
-      <Clipboard value={test.publicKey} />
-      <br />
-    </span>
-  {/each}
+ 
+  {#if $testProfiles != []}
+    {#each $testProfiles as test, index}
+       <br />{index + 1}:
+      <span class="peerspan">
+        {test.publicKey}
+        <Clipboard value={test.publicKey} />
+        <br />
+      </span>
+    {/each}
+  {/if}
 
   <hr />
 {/if}

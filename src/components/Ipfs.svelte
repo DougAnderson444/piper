@@ -179,9 +179,11 @@
     for (let i = 0; i < 3; i++) {
       //str = str + i;
       const password = String(Math.random() + Date.now() + i);
-      let temp = new Profile(password);
+      let temp = await new Profile(password);
       $testProfiles = [...$testProfiles, temp]; // copy to stores
-    }
+	}
+	$testProfiles = $testProfiles
+	console.log($testProfiles)
   });
 
   $: {
