@@ -1,7 +1,7 @@
 {
   "name": "piper-sapper-now",
   "description": "Sapper app deployed to Zeit Now",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "scripts": {
     "start": "sapper dev",
     "dev": "sapper dev --port 3000",
@@ -12,6 +12,7 @@
     "test": "run-p --race dev cy:run"
   },
   "dependencies": {
+    "base32.js": "^0.1.0",
     "compression": "^1.7.1",
     "ipfs": "^0.42.0",
     "it-all": "^1.0.1",
@@ -32,6 +33,6 @@
   "optionalDependencies": {
     "fsevents": "^2.1.2"
   },
-  "repository": "https://github.com/DougAnderson444/sapper-now",
+  "repository": "https://github.com/DougAnderson444/piper",
   "license": "MIT"
 }

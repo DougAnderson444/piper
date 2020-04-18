@@ -1,62 +1,63 @@
-// general utility functions for the rest of the app
 import { signMessage, verifySignature } from "./pkiHelper.js";
-import { get } from "svelte/store";
-import { root, rootHash, keys, ipfsNode } from "./stores.js";
+
+// general utility functions for the rest of the app
+export function savePeerToRoot(root, peerID, value = {}) {
+  // save the new object back to root in the right spot
+  let breadcrumbs = [Object.keys(root)[0], "UUIDs", peerID];
+  saveDeepValue(root, breadcrumbs, value);
+}
+
+// saveDeepValue down into the object until reach key:value pair
+export function saveDeepValue(obj, crumbs, value = {}) {
+  if (crumbs.length > 1) {
+    var e = crumbs.shift();
+    if (obj[e] === undefined) {
+      obj[e] = {};
+    }
+    saveDeepValue(obj[e], crumbs, value);
+  } else {
+    obj[crumbs[0]] = value;
+  }
+}
 
 const pingText = "Ping!";
-/*
+
 export async function ping(ipfsNode, topic) {
-  console.log(`Pinging ${topic} with ${pingText}`);
-  await ipfsNode.pubsub.publish(topic, pingText);
-}
-
-export async function sub(ipfsNode, topic) {
-  console.log(`subscribing to ${topic}`);
   try {
-    return await ipfsNode.pubsub.subscribe(topic, receiveMsg); // return a promise
-  } catch {
-    return new Error("error"); //throw
+    console.log(`pinging ${topic}`);
+    const res = await ipfsNode.pubsub.publish(topic, pingText);
+    console.log(`Ping done ${topic}, ${res}`);
+
+  } catch (err) {
+    console.log("Error pinging, ", err);
+    return new Error(err); //throw
   }
 }
 
-export async function pub(ipfsNode, topic, msg) {}
+// profile listens for topic
+export async function subscr(ipfsNode, topic, receiveHandler) {
 
-const receiveMsg = async msg => {
-  //console.log(`Pubsub Msg rx'd: \n ${msg.data.toString()} `)
-  let hash = get(rootHash);
-  console.log(`hash is ${hash}`)
-  let k = get(keys);
-  let i = get(ipfsNode);
-  //handle Ping
-  if (msg.data.toString() == pingText) {
-    // respond by broadcasting the r00t hash
-    //console.log(`respond by broadcasting the r00t hash \n ${addedFileHash} \nto topic \n ${topic} `)
-    // get values from the store, since this is a plain old .js file and not svelte
-
-    // sign the msg, so they know it's legit
-    const msgSignature = signMessage(hash, k.privateKey);
-    const msgObj = { data: hash, sig: msgSignature };
-    const msgString = JSON.stringify(msgObj);
-    await i.pubsub.publish(k.publicKey, msgString);
-    console.log(`utils publishing ${msgString} to ${k.publicKey} `);
-  } else {
-    // handle data response
-    //console.log(`got acutal data: \n ${JSON.parse(msg.data.toString())} `)
-
-    const msgObj = JSON.parse(msg.data); // CID object, content ID
-    //console.log(`check the signature: \n Does ${JSON.parse(msg.data.toString()).data} \n Signature: ${JSON.parse(msg.data.toString()).sig}\nmatch ${$keys.publicKey}`)
-
-    const legit = verifySignature(msgObj.data, msgObj.sig, k.publicKey);
-    console.log(`legit: ${legit} => ${msg.data.toString()}`);
-    // save the data to the proper location
-    console.log(`topicIDs: ${JSON.stringify(msg.topicIDs)} `);
-    //save this msg data to the msg topic
-    let newRoot = get(root)
-    console.log(`newRoot["UUIDs"][${msg.topicIDs[0]}] = ${JSON.stringify(JSON.parse(msg.data.toString()).data)} `)
-    newRoot["UUIDs"][msg.topicIDs[0]]["rootHash"] = JSON.stringify(msgObj.data.toString()) //(JSON.parse(msg.data.toString()).data).toString()
-    root.update( () => newRoot )
+  try {
+    return await ipfsNode.pubsub.subscribe(topic, receiveHandler);
+  } catch (err) {
+    console.log("Error subsc'ing, ", err);
+    return new Error(err); //throw
   }
-};
-*/
+}
+
+export async function publish(ipfsNode, profile, msgString) {
+  // publ a msg and sign with this profile's private key
+  const msgSignature = signMessage(msgString, profile.privateKey); // sign the msg, so they know it's legit
+  const msgObj = { data: msgString, sig: msgSignature };
+  const msgStringified = JSON.stringify(msgObj);
+
+  try {
+    return await ipfsNode.pubsub.publish(profile.publicKey, msgStringified);
+  } catch (err) {
+    console.log("Error publish'ing, ", err);
+    return new Error(err); //throw
+  }
+}
+
 const util = {};
 export default util;

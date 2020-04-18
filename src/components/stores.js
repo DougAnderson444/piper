@@ -31,19 +31,60 @@ export const elapsed = derived([time, start], ([$time, $start]) =>
   Math.max(Math.round(($time - $start) / 1000), 0)
 );
 
-let def = {
+let defaultObj = {
   Cats: {
     "Cat 1": {
-      description: {
-        NewCat: "joe",
-        MoreCat: { FatCat: "Maru" }
-      },
-      "cat 1A": "Keyboard"
+      "name": "Fluffy"
     },
-    "Cat 2": { "cat 2": "MaruTwo" },
-    "Cat 3": { "cat 3": "Henri The Existential Cat" }
+    "Cat 2": { "cat too": "Maru Two" }
   },
   Dogs: {}
 };
 
-export const root = writable(def);
+//export const root = writable(defaultObj); // init root object (the portfolio)
+
+function createRoot() {
+	const { subscribe, set, update } = writable(defaultObj);
+
+	return {
+		subscribe,
+		make: (x) => {set(x)},
+		set: (x) => {set(x)},
+		reset: () => {set(defaultObj)}
+	};
+}
+
+export const root = createRoot();
+
+// save for later maybe
+
+let profileExample = [
+  { "Favorite Color(s)": ["Blue"], tags: ["car", "dress shirt"] },
+  {
+    Links: [{ Brave: "https://brave.com/dou750" }, "Communications"],
+    tags: ["resume", "skills"]
+  },
+  {
+    Skills: [{ skill: "Presentation" }, { skill: "Communications" }],
+    tags: ["resume", "skills"]
+  },
+  {
+    Experiences: [
+      {
+        "Naval Officer": [
+          { Start: "1997", Finish: "2017", Employer: "Royal Canadian Navy" }
+        ]
+      },
+      { "Public Service": ["2017-2019", "Dept National Defence"] }
+    ],
+    tags: ["resume", "experience"]
+  },
+  {
+    "Contact Details": [
+      { Phone: ["Mobile", "613-555-1234"], tags: ["preferred"] },
+      { Phone: ["Office", "819-555-1234"], tags: ["voicemail"] },
+      { email: "doug@peerpiper.io" }
+    ],
+    tags: ["resume", "experience"]
+  }
+];

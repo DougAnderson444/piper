@@ -12,7 +12,6 @@
   onMount(async () => {
     const password = "my super secret pass phrase that nobody will ever guess";
     $myProfile = await new Profile(password);
-    console.log(`profile created: ${JSON.stringify($myProfile.publicKey)}`);
   });
 </script>
 

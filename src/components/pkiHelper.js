@@ -1,11 +1,39 @@
 // scripts for publci key cryptography
 import forge from 'node-forge'
+import IPFS from "ipfs";
+
 var ed25519 = forge.pki.ed25519;
 
 // pki.publicKeyToPem(publicKey);
+// util.binary.hex.encode
+// util.binary.base58.encode
 
 //forge.options.usePureJavaScript = true;
 //https://github.com/digitalbazaar/forge/issues/535
+
+function enco(buff){
+    return eb32(buff)
+}
+
+function deco(x){
+    return db32(x)
+}
+
+function eb32(buffer) {
+    return IPFS.multibase.encode("base32", buffer).toString();
+}
+
+function db32(x) {
+    return new forge.util.ByteBuffer(IPFS.multibase.decode(x), 'binary');
+}
+
+function eb58(buffer) {
+    return forge.util.binary.base58.encode( new forge.util.ByteBuffer(buffer) )
+}
+
+function db58(x) {
+    return new forge.util.ByteBuffer(forge.util.binary.base58.decode(x), 'binary');
+}
 
 function eb64(buffer) {
     return forge.util.encode64(new forge.util.ByteBuffer(buffer).bytes());
@@ -24,9 +52,9 @@ export function createKeyPair(password){
 
         try{
 
-            var keypair = ed25519.generateKeyPair({seed: seed});            
-            var privateKey = eb64(keypair.privateKey);
-            var publicKey = eb64(keypair.publicKey);
+            var keypair = ed25519.generateKeyPair({seed: seed}); // keypair is NativeBuffer: var NativeBuffer = typeof Buffer === 'undefined' ? Uint8Array : Buffer; 
+            var privateKey = enco(keypair.privateKey);
+            var publicKey = enco(keypair.publicKey);
             
             resolve({ publicKey, privateKey })
 
@@ -38,7 +66,7 @@ export function createKeyPair(password){
     })
 }
 /*
-Take base64 privateKey and sign the text message
+Take base58 privateKey and sign the text message
 */
 export function signMessage(msg, privateKey){
 
@@ -47,26 +75,26 @@ export function signMessage(msg, privateKey){
     md.update(msg, 'utf8');
     var signature = ed25519.sign({
         md: md,
-        privateKey: db64(privateKey)
+        privateKey: deco(privateKey)
     });
-    return eb64(signature)
+    return enco(signature)
 }
 
 /*
-Take base64 data, decode it and verify the signature
+Take base58 data, decode it and verify the signature
 */
 export function verifySignature(data, sig, publicKey){
 
     // verify a signature on a message digest
     var md = forge.md.sha256.create();
     md.update(data, 'utf8');
-
+console.log(`verifying sig: ${JSON.stringify(sig)} and pubKey: ${publicKey}`)
     var verified = ed25519.verify({
         md: md,
         // node.js Buffer, Uint8Array, forge ByteBuffer, or binary string
-        signature: db64(sig),
+        signature: deco(sig),
         // node.js Buffer, Uint8Array, forge ByteBuffer, or binary string
-        publicKey: db64(publicKey)
+        publicKey: deco(publicKey)
     });
     return verified
 }
