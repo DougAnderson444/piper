@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import IpfsComp from "../components/Ipfs.svelte";
   import UserInterface from "../components/UserInterface.svelte";
-  import { myProfile, ipfsNode, portfolio } from "../components/stores.js";
+  import { myProfile, ipfsNode, portfolio, rootHash } from "../components/stores.js";
   import Profile from "../utils/Profile.js";
 
   //  for url/path/params/query: https://sapper.svelte.dev/docs#Argument
@@ -11,7 +11,8 @@
 
   onMount(async () => {
     const password = "my super secret pass phrase that nobody will ever guess";
-    $myProfile = await new Profile(password);
+    console.log(`profiles rootHashs set to ${$rootHash}`)
+    $myProfile = await new Profile(password, $rootHash);
   });
 </script>
 
@@ -24,12 +25,14 @@
     color: #525252;
     width: 100%;
   }
+  h1 {
+    font-size: 48px;
+  }
   .title {
     margin: 0;
     width: 100%;
     padding-top: 20px;
     line-height: 1.15;
-    font-size: 48px;
     font-weight: bold;
   }
   .description {
@@ -57,10 +60,10 @@
       class="logo"
       src="P.png" />
     <h1 class="title">PeerPiper.io</h1>
+    <h2 class="title">Getting data from the people who have it, to the people who need it.</h2>
   </center>
   <p class="description">
-    Your ultimate personal data sink. Save once, pipe out to your selected peer
-    groups.
+    Save your data in one spot, then pipe out to your selected peers groups unlimited times.
     <br />
     Connect with friends and businesses to automagically sync data for easier
     life and better christmas gifts.

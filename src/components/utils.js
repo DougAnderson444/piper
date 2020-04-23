@@ -1,33 +1,10 @@
 import { signMessage, verifySignature } from "./pkiHelper.js";
 
-// general utility functions for the rest of the app
-export function savePeerToRoot(root, peerID, value = {}) {
-  // save the new object back to root in the right spot
-  let breadcrumbs = [Object.keys(root)[0], "UUIDs", peerID];
-  saveDeepValue(root, breadcrumbs, value);
-}
-
-// saveDeepValue down into the object until reach key:value pair
-export function saveDeepValue(obj, crumbs, value = {}) {
-  if (crumbs.length > 1) {
-    var e = crumbs.shift();
-    if (obj[e] === undefined) {
-      obj[e] = {};
-    }
-    saveDeepValue(obj[e], crumbs, value);
-  } else {
-    obj[crumbs[0]] = value;
-  }
-}
-
-const pingText = "Ping!";
+export const PING_TEXT = "Ping!";
 
 export async function ping(ipfsNode, topic) {
   try {
-    console.log(`pinging ${topic}`);
-    const res = await ipfsNode.pubsub.publish(topic, pingText);
-    console.log(`Ping done ${topic}, ${res}`);
-
+    const res = await ipfsNode.pubsub.publish(topic, PING_TEXT);
   } catch (err) {
     console.log("Error pinging, ", err);
     return new Error(err); //throw
@@ -58,6 +35,26 @@ export async function publish(ipfsNode, profile, msgString) {
     return new Error(err); //throw
   }
 }
+export function savePeerToRoot(root, peerID, value = {}) {
+  // save the new object to root in the "right spot"
+  let breadcrumbs = [Object.keys(root)[0], "UUIDs", peerID];
+  saveDeepValue(root, breadcrumbs, value);
+}
+
+// saveDeepValue down into the object until reach key:value pair
+export function saveDeepValue(obj, crumbs, value = {}) {
+  if (crumbs.length > 1) {
+    var e = crumbs.shift();
+    if (obj[e] === undefined) {
+      obj[e] = {};
+    }
+    saveDeepValue(obj[e], crumbs, value);
+  } else {
+    obj[crumbs[0]] = value;
+  }
+}
+
+
 
 const util = {};
 export default util;

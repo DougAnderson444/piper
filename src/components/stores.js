@@ -7,8 +7,8 @@ export const nodeId = writable(0);
 export const nodeAgentVersion = writable(0);
 export const nodeProtocolVersion = writable(0);
 export const myProfile = writable(0); // public and private key object
-export const rootHash = writable(0); // public and private key object
 export const testProfiles = writable([]); // public and private key object
+export const testRoots = writable([]); // public and private key object
 
 // start function is called when the store gets its first subscriber;
 export const time = readable(new Date(), function start(set) {
@@ -34,27 +34,33 @@ export const elapsed = derived([time, start], ([$time, $start]) =>
 let defaultObj = {
   Cats: {
     "Cat 1": {
-      "name": "Fluffy"
+      name: "Fluffy"
     },
     "Cat 2": { "cat too": "Maru Two" }
   },
   Dogs: {}
 };
 
-//export const root = writable(defaultObj); // init root object (the portfolio)
+export const root = writable(defaultObj); //createRoot();
 
-function createRoot() {
-	const { subscribe, set, update } = writable(defaultObj);
-
-	return {
-		subscribe,
-		make: (x) => {set(x)},
-		set: (x) => {set(x)},
-		reset: () => {set(defaultObj)}
-	};
-}
-
-export const root = createRoot();
+//Derives a store from one or more other stores. Whenever those dependencies change, the callback runs.
+export const rootHash = derived([root, ipfsNode], ([$root, $ipfsNode], set) => {
+  if ($ipfsNode != 0) {
+    try {
+      $ipfsNode.dag
+        .put(JSON.parse(JSON.stringify($root)), { pin: true })
+        .then(h => {
+          set(h);
+          typeof window !== "undefined" && h != 0
+            ? localStorage.setItem("rootHash", h)
+            : false;
+          // save the rootHash to localstorage every time it changes (using $: in svelte)
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+});
 
 // save for later maybe
 

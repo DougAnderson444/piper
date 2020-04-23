@@ -17,11 +17,13 @@
     root,
     rootHash,
     myProfile,
-    testProfiles
+    testProfiles,
+    testRoots
   } from "./stores.js";
 
   import { createKeyPair, signMessage, verifySignature } from "./pkiHelper.js";
-  import { savePeerToRoot } from "./utils.js";
+  import { savePeerToRoot, publish, subscr, ping, PING_TEXT } from "./utils.js";
+
   // IPFS
   import IPFS from "ipfs";
   import all from "it-all";
@@ -42,7 +44,6 @@
   const stringToUse = "hello world from webpacked IPFS. Love, Douglas.";
 
   let password = "";
-  const pingText = "Ping!";
   /*
 	~/.ipfs/config only contains the identity key of the local IPFS node.
 	{
@@ -102,7 +103,7 @@
      * START IPFS NODE
      */
     $ipfsNode = await IPFS.create(options);
-    console.log(`ipfs node ready \n ${$ipfsNode}`)
+    console.log(`ipfs node ready \n ${$ipfsNode}`);
     $start = new Date();
 
     const { id, agentVersion, protocolVersion } = await $ipfsNode.id();
@@ -129,8 +130,9 @@
 
       const data = Buffer.concat(bufs);
       addedFileContents = data.toString("utf8");
-	}
-	*/
+  
+    }
+	  */
 
     //const pbLink = await $ipfsNode.dag.get("QmSnuWmxptJZdLJpKRarxBMS2Ju2oANVrgbr2xWbie9b2D")
 
@@ -144,8 +146,8 @@
         cb: "foo"
       }
       //,d: pbLink.value._links
-	};
-	*/
+	  };
+	  */
 
     //const treeid = await $ipfsNode.dag.put(obj); //, { format: 'dag-cbor', hashAlg: 'sha2-256' }
     //console.log(`treeid is \n https://explore.ipld.io/#/explore/${treeid.toString()}`);
@@ -181,25 +183,37 @@
      * make a few public myProfile
      */
     for (let i = 0; i < 3; i++) {
-      //str = str + i;
+
       const password = String(Math.random() + Date.now() + i);
-      let temp = await new Profile(password);
+      let k = {};
+      k['key '+i] = "not set yet";
+      $testRoots[i] = (await getCID(k)).toString();
+      $testRoots = $testRoots
+      console.log(`test profile ${i} rootHash set to ${$testRoots[i]}`)
+      let temp = await new Profile(password, $testRoots[i]);
       $testProfiles = [...$testProfiles, temp]; // copy to stores
+      $testRoots[i] = {cid: (await getCID({"This profile's publicKey": temp.publicKey})).toString() }
+      $testRoots = $testRoots
+      
+      // what to do when test ping rx'd
+      let receiveTestMsg = msg => {
+        if (msg.data.toString() == PING_TEXT) {
+          const msgString = String(temp.rootHash); //String("hash for " + msg.topicIDs[0]); //JSON.stringify(msgObj)
+          publish($ipfsNode, temp, msgString); //respond using this profile's keypair, sign the response msg
+        } 
+      }
+      
       // listen for msgs
-      subscr(temp, temp.publicKey).then(() => {
-        // ping(temp.publicKey); // Ping
-      });
+      subscr($ipfsNode, temp.publicKey, receiveTestMsg)
     }
     $testProfiles = $testProfiles;
   });
 
+// end onMount
+
   $: {
     if ($ipfsNode && $myProfile != 0) {
-      //console.log(`$ipfsNode and myProfile= ${$myProfile} let's start listening`);
-      subscr($myProfile, $myProfile.publicKey).then(() => {
-        //console.log(`ipfs pinging $myProfile.publicKey ${$myProfile.publicKey}`);
-        //ping($myProfile.publicKey);
-      });
+      subscr($ipfsNode, $myProfile.publicKey, receiveMsg)
     }
   }
 
@@ -215,62 +229,25 @@
     }
   }
 
-  function ping(topic) {
-    $ipfsNode.pubsub.publish(topic, pingText);
-  }
+  // what to do with the received
+  const receiveMsg = msg => {
+    // The `msg` has the format `{from: String, seqno: Buffer, data: Buffer, topicIDs: Array<String>}`
 
-  async function publish(profile, msgString) {
-    // publ a msg and sign with this profile's private key
-    const msgSignature = signMessage(msgString, profile.privateKey); // sign the msg, so they know it's legit
-    const msgObj = { data: msgString, sig: msgSignature };
-    const msgConverted = JSON.stringify(msgObj)
-    
-    try {
-      let res = await $ipfsNode.pubsub.publish(
-        profile.publicKey,
-        msgConverted
-      ); 
-      console.log(
-        `Successfull published ${msgString} from ${profile.publicKey}!`
-      );
-      return res;
-    } catch (err) {
-      console.log("Error publishing, ", err);
-      return new Error(err); //throw
-    }
-  }
+    if (msg.data.toString() == PING_TEXT) {
+      const msgString = String($rootHash); //String("hash for " + msg.topicIDs[0]); //JSON.stringify(msgObj)
+      publish($ipfsNode, $myProfile, msgString); //respond using this profile's keypair, sign the response msg
+    } else {
+      console.log(`msg data: ${msg.data}`);
+      const msgObj = JSON.parse(msg.data);
+      const legit = verifySignature(msgObj.data, msgObj.sig, msg.topicIDs[0]);
 
-  // profile listens for topic
-  async function subscr(profile, topic) {
-    // what to do with the received
-    const receiveMsg = msg => {
-      // The `msg` has the format `{from: String, seqno: Buffer, data: Buffer, topicIDs: Array<String>}`
-      
-      if (msg.data.toString() == pingText) {
-        // respond to ping
-        const msgString = String("hash for " + msg.topicIDs[0]); //JSON.stringify(msgObj)
-        publish(profile, msgString);
+      if (legit) {
+        console.log(`LEGIT, save: ${JSON.stringify(msgObj.data)} `); //MC Hammer
+        savePeerToRoot($root, msg.topicIDs[0], JSON.stringify(msgObj.data));
+        $root = $root; // to update the store
       } else {
-        console.log(`msg data: ${msg.data}`)
-        const msgObj = JSON.parse(msg.data);
-        const legit = verifySignature(msgObj.data, msgObj.sig, msg.topicIDs[0]);
-
-        if (legit) {
-          savePeerToRoot($root, msg.topicIDs[0], msgObj.data)
-          $root = $root; // to update the store
-        } else {
-          console.log(`NOT LEGIT, QUIT: ${legit} `); //MC Hammer
-        }
+        console.log(`NOT LEGIT, QUIT: ${legit} `); //MC Hammer
       }
-    };
-
-    try {
-      let res = await $ipfsNode.pubsub.subscribe(topic, receiveMsg); // return a promise
-      //console.log(`Successfull subsc'd to ${topic}! res; ${res} `);
-      return res;
-    } catch (err) {
-      console.log("Error subsc'ing, ", err);
-      return new Error(err); //throw
     }
   }
 </script>
@@ -286,19 +263,16 @@
   {#if $nodeId}
     <div transition:slide={{ delay: 100, duration: 750 }}>
       <h2>Your node is running in the browser.</h2>
-      <!--p>Your browser server ID is: <strong>{$nodeId}</strong></p>
-		<hr />
-	</div>
-	<div-->
-      Your current DAG roothash is:
-      <br />
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://explore.ipld.io/#/explore/{$rootHash}">
-        {$rootHash}
-      </a>
-      <br />
+      <p>
+        <b>View your data in web 3.0'land (kinda like a blockchain, but different):</b>
+        <br />
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://explore.ipld.io/#/explore/{$rootHash}">
+          {$rootHash}
+        </a>
+      </p>
     </div>
   {:else}
     <div transition:slide={{ delay: 100, duration: 750 }}>

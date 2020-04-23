@@ -51,22 +51,17 @@ export function createKeyPair(password){
         var seed = md.digest().getBytes();
 
         try{
-
             var keypair = ed25519.generateKeyPair({seed: seed}); // keypair is NativeBuffer: var NativeBuffer = typeof Buffer === 'undefined' ? Uint8Array : Buffer; 
             var privateKey = enco(keypair.privateKey);
             var publicKey = enco(keypair.publicKey);
-            
-            resolve({ publicKey, privateKey })
-
+            resolve({ publicKey, privateKey }); // resolve the Promise
         }catch(err){
-
             reject(err)
-
         }
     })
 }
 /*
-Take base58 privateKey and sign the text message
+Take privateKey and sign the text message
 */
 export function signMessage(msg, privateKey){
 
@@ -81,14 +76,13 @@ export function signMessage(msg, privateKey){
 }
 
 /*
-Take base58 data, decode it and verify the signature
+Take data and verify the signature
 */
 export function verifySignature(data, sig, publicKey){
 
     // verify a signature on a message digest
     var md = forge.md.sha256.create();
     md.update(data, 'utf8');
-console.log(`verifying sig: ${JSON.stringify(sig)} and pubKey: ${publicKey}`)
     var verified = ed25519.verify({
         md: md,
         // node.js Buffer, Uint8Array, forge ByteBuffer, or binary string
@@ -98,16 +92,3 @@ console.log(`verifying sig: ${JSON.stringify(sig)} and pubKey: ${publicKey}`)
     });
     return verified
 }
-/*
-// sign data with a private key and output DigestInfo DER-encoded bytes
-// (defaults to RSASSA PKCS#1 v1.5)
-// hash = message digests
-var hash = forge.hash.sha1.create();
-hash.update('sign this', 'utf8');
-var signature = privateKey.sign(hash);
-
-// verify data with a public key
-// (defaults to RSASSA PKCS#1 v1.5)
-var verified = publicKey.verify(hash.digest().bytes(), signature);
-
-*/
