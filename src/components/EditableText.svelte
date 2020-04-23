@@ -52,5 +52,5 @@
     on:keyup={handleEnter}
     on:blur={handleBlur} />
 {:else}
-  <span contenteditable class={labelClasses} on:input={toggle} bind:this={inputEl}>{label}</span>
+  <span contenteditable class={labelClasses} on:input={toggle} bind:this={inputEl}>{@html label}</span>
 {/if}

@@ -11,7 +11,6 @@
 
   onMount(async () => {
     const password = "my super secret pass phrase that nobody will ever guess";
-    console.log(`profiles rootHashs set to ${$rootHash}`)
     $myProfile = await new Profile(password, $rootHash);
   });
 </script>
@@ -44,7 +43,7 @@
 </style>
 
 <svelte:head>
-  <title>PeerPiper.io - Save once, Pipe to Peers anytime</title>
+  <title>PeerPiper.io - Save once, Sync with Many with one click</title>
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />

@@ -4,15 +4,34 @@
   import ShowValue from "./ShowValue.svelte";
   import EditableText from "./EditableText.svelte";
   import Menu from "./Menu.svelte";
-  import { root } from "./stores.js";
+  import { root, ipfsNode } from "./stores.js";
+  import IPFS from "ipfs";
 
   export let breadcrumbs = [];
   export let key;
   export let val;
   export let expanded = false;
-  let entry = {};
-  //console.log(`key is ${JSON.stringify(key)}`);
-  //key["Cat 1"] = "Symba"; // works at the top only
+  let isCID, contactsData;
+  console.log(`key=${key} \n val=${JSON.stringify(val)}`);
+
+  // preprocess value
+  if (val.hasOwnProperty('/') && IPFS.isIPFS.cid(val['/'])) {
+    console.log(`1. IS CID: ${JSON.stringify(val)}`);
+    isCID = true;
+  } else {
+    console.log(`1. Folder opened, key=${key} not CID: ${JSON.stringify(val)}`);
+  }
+
+  if (isCID) {
+    (async () => {
+      try {
+        contactsData = (await $ipfsNode.dag.get(val['/'])).value;
+        console.log(`contactsData: ${contactsData}`);
+      } catch (err) {
+        console.log(err);
+      }
+    })();
+  }
 
   function toggle() {
     expanded = !expanded;
@@ -60,16 +79,21 @@
 </span>
 
 {#if expanded}
-  <Menu {breadcrumbs} bind:entry />
+  <Menu {breadcrumbs} />
   <ul>
     {#each [...Object.entries(val).sort()] as [key, val]}
       <li>
         {#if typeof val === 'object'}
           <svelte:self {key} {val} breadcrumbs={breadcrumbs.concat(key)} />
+        {:else if isCID}
+          <svelte:self
+            {key}
+            bind:val={contactsData}
+            breadcrumbs={breadcrumbs.concat(key)} /> 
         {:else}
           <ShowKey {key} breadcrumbs={breadcrumbs.concat(key)} />
           :
-          <ShowValue {val} breadcrumbs={breadcrumbs.concat(key)} />
+          <ShowValue {val} breadcrumbs={breadcrumbs.concat(key)} /> 
         {/if}
       </li>
     {/each}

@@ -37,7 +37,7 @@ export async function publish(ipfsNode, profile, msgString) {
 }
 export function savePeerToRoot(root, peerID, value = {}) {
   // save the new object to root in the "right spot"
-  let breadcrumbs = [Object.keys(root)[0], "UUIDs", peerID];
+  let breadcrumbs = ["Contacts", peerID, "/"];
   saveDeepValue(root, breadcrumbs, value);
 }
 

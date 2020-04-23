@@ -6,7 +6,6 @@
 
   export let breadcrumbs = [];
   let key;
-  export let entry = {};
 
   if (breadcrumbs.length - 1 > 0) {
     key = `New in ${breadcrumbs[breadcrumbs.length - 1]}`;
@@ -29,8 +28,6 @@
     if (e.keyCode === 13) folderText.blur();
   };
   const newfolder = () => {
-    // breadcrumbs must include the "New Key" folder name
-    entry.val = "New Folder";
     closeMenu();
     drill($root, breadcrumbs.concat(["New Folder"]));
     console.log(`new root is ${JSON.stringify($root, null, 2)}`);

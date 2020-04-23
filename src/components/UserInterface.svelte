@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import ObjectComp from "./ObjectComp.svelte";
   import AddPeer from "./AddPeer.svelte";
-  import { root, rootHash, ipfsNode, portfolio, profile } from "./stores.js";
+  import { root, rootHash, defaultObj, ipfsNode, portfolio, profile } from "./stores.js";
   import Head from "./Head.svelte";
   import IPFS from "ipfs";
 
@@ -10,16 +10,19 @@
     typeof window !== "undefined" &&
     localStorage.getItem("rootHash") &&
     localStorage.getItem("rootHash") != 0 &&
-    IPFS.CID.isCID(new IPFS.CID(localStorage.getItem("rootHash")))
+    IPFS.isIPFS.cid(localStorage.getItem("rootHash"))
   ) {
     // IPFS node rootHash stored, let's pull it up
-    (async () => {
+    console.log(`IPFS node rootHash stored, let's pull it up`);
+
+    ;(async () => {
       // dag.get returns an IPLD format node
       $root = (await $ipfsNode.dag.get(localStorage.getItem("rootHash"))).value;
-      //console.log(`New portfolio is ${JSON.stringify($root)}`)
+      console.log(`Loaded Portfolio is ${JSON.stringify($root)}`)
     })();
   }else{
-    console.log(`Localstorage hash failed somewhere.`)
+    console.log(`LocalStorage didnt load hash.`)
+    $root = $defaultObj; //load from default
   }
 </script>
 
@@ -37,7 +40,7 @@
     <AddPeer />
     {#each [...Object.entries($root).sort()] as [key, val]}
       <p>
-        <ObjectComp breadcrumbs={[key]} {key} {val} expanded />
+        <ObjectComp breadcrumbs={[key]} {key} {val} />
       </p>
     {/each}
   </div>

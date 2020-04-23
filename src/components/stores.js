@@ -31,17 +31,20 @@ export const elapsed = derived([time, start], ([$time, $start]) =>
   Math.max(Math.round(($time - $start) / 1000), 0)
 );
 
-let defaultObj = {
-  Cats: {
+let defObj = {
+  Me: {
     "Cat 1": {
-      name: "Fluffy"
+      cat1name: "Fluffy",
+      "Fluff faves": {
+        name: "Toy 1"
+      }
     },
-    "Cat 2": { "cat too": "Maru Two" }
+    "Cat 2": { "cat too name": "Maru Two" }
   },
-  Dogs: {}
+  Contacts: {}
 };
-
-export const root = writable(defaultObj); //createRoot();
+export const defaultObj = writable(defObj); //createRoot();
+export const root = writable(defObj); //createRoot();
 
 //Derives a store from one or more other stores. Whenever those dependencies change, the callback runs.
 export const rootHash = derived([root, ipfsNode], ([$root, $ipfsNode], set) => {
