@@ -16,7 +16,7 @@
 
   onMount(async () => {
     if (typeof window !== "undefined" && localStorage.getItem("myProfile") ) {
-      $myProfile = localStorage.getItem("myProfile", JSON.parse($myProfile));
+      $myProfile = JSON.parse(localStorage.getItem("myProfile"));
     } else {
       const password = String("password 1 2... " + Math.random() + Date.now());
       console.log(`Profile password is: ${password}`)

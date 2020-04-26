@@ -20,6 +20,7 @@
   }
   //on:mousemove={visible = !visible}
   //    <AddPeer />
+  $: console.log(`myProfile ${JSON.stringify($myProfile)}`)
 </script>
 
 <style>
