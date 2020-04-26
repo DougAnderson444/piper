@@ -4,6 +4,7 @@ export const PING_TEXT = "Ping!";
 
 export async function ping(ipfsNode, topic) {
   try {
+    console.log(`pinging ${topic}`)
     const res = await ipfsNode.pubsub.publish(topic, PING_TEXT);
   } catch (err) {
     console.log("Error pinging, ", err);

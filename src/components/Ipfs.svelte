@@ -2,6 +2,7 @@
   // svelte stuff
   import { onMount } from "svelte";
   import { fade, slide } from "svelte/transition";
+  import QRCode from "./QRCode.svelte";
 
   //  for url/path/params/query: https://sapper.svelte.dev/docs#Argument
   import { stores } from "@sapper/app";
@@ -65,12 +66,14 @@
 		page.query.baz === true
 	*/
   let privKey = null; // to load a known PeerId
-  let modifier = "";
+  let modifier = ""; //Math.random() //"";
   let repo = "ipfs";
   if ($page.query.repo) {
     modifier = $page.query.repo;
     repo += modifier;
     console.log(`repo: ${repo}`);
+  } else {
+    // modifier = "-" + Math.floor(Math.random()*10000);
   }
   if (
     typeof window !== "undefined" &&
@@ -84,7 +87,7 @@
     // https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs#ipfs-constructor
 
     const options = {
-      repo: "ipfs" + modifier, // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
+      repo: repo, // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
       pass: password, //, // https://github.com/ipfs/js-ipfs/issues/1138
       libp2p: {
         config: {
@@ -93,10 +96,11 @@
           }
         }
       },
-      EXPERIMENTAL: { ipnsPubsub: true }
-      //init: {				// only runs initially
-      //privateKey: privKey, // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
-      //}
+      EXPERIMENTAL: { ipnsPubsub: true },
+      init: {
+        // only runs initially
+        privateKey: privKey // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
+      }
     };
 
     /*
@@ -183,37 +187,40 @@
      * make a few public myProfile
      */
     for (let i = 0; i < 3; i++) {
-
       const password = String(Math.random() + Date.now() + i);
       let k = {};
-      k['key '+i] = "not set yet";
+      k["key " + i] = "not set yet";
       $testRoots[i] = (await getCID(k)).toString();
-      $testRoots = $testRoots
-      console.log(`test profile ${i} rootHash set to ${$testRoots[i]}`)
+      $testRoots = $testRoots;
+      console.log(`test profile ${i} rootHash set to ${$testRoots[i]}`);
       let temp = await new Profile(password, $testRoots[i]);
       $testProfiles = [...$testProfiles, temp]; // copy to stores
-      $testRoots[i] = {cid: (await getCID({"This profile's publicKey": temp.publicKey})).toString() }
-      $testRoots = $testRoots
-      
+      $testRoots[i] = {
+        cid: (await getCID({
+          "This profile's publicKey": temp.publicKey
+        })).toString()
+      };
+      $testRoots = $testRoots;
+
       // what to do when test ping rx'd
       let receiveTestMsg = msg => {
         if (msg.data.toString() == PING_TEXT) {
           const msgString = String(temp.rootHash); //String("hash for " + msg.topicIDs[0]); //JSON.stringify(msgObj)
           publish($ipfsNode, temp, msgString); //respond using this profile's keypair, sign the response msg
-        } 
-      }
-      
+        }
+      };
+
       // listen for msgs
-      subscr($ipfsNode, temp.publicKey, receiveTestMsg)
+      subscr($ipfsNode, temp.publicKey, receiveTestMsg);
     }
     $testProfiles = $testProfiles;
   });
 
-// end onMount
+  // end onMount
 
   $: {
     if ($ipfsNode && $myProfile != 0) {
-      subscr($ipfsNode, $myProfile.publicKey, receiveMsg)
+      subscr($ipfsNode, $myProfile.publicKey, receiveMsg);
     }
   }
 
@@ -234,6 +241,7 @@
     // The `msg` has the format `{from: String, seqno: Buffer, data: Buffer, topicIDs: Array<String>}`
 
     if (msg.data.toString() == PING_TEXT) {
+      console.log(`Ping replying with ${$rootHash}`);
       const msgString = String($rootHash); //String("hash for " + msg.topicIDs[0]); //JSON.stringify(msgObj)
       publish($ipfsNode, $myProfile, msgString); //respond using this profile's keypair, sign the response msg
     } else {
@@ -249,7 +257,7 @@
         console.log(`NOT LEGIT, QUIT: ${legit} `); //MC Hammer
       }
     }
-  }
+  };
 </script>
 
 <style>
@@ -264,7 +272,10 @@
     <div transition:slide={{ delay: 100, duration: 750 }}>
       <h2>Your node is running in the browser.</h2>
       <p>
-        <b>View your data in web 3.0'land (kinda like a blockchain, but different):</b>
+        <b>
+          View your data in web 3.0'land (kinda like a blockchain, but
+          different):
+        </b>
         <br />
         <a
           target="_blank"
@@ -273,6 +284,8 @@
           {$rootHash}
         </a>
       </p>
+      <QRCode value={`https://explore.ipld.io/#/explore/${$rootHash}`} />
+      <p>Browser nodeID: {$nodeId}</p>
     </div>
   {:else}
     <div transition:slide={{ delay: 100, duration: 750 }}>

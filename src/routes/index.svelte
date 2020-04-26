@@ -2,7 +2,12 @@
   import { onMount } from "svelte";
   import IpfsComp from "../components/Ipfs.svelte";
   import UserInterface from "../components/UserInterface.svelte";
-  import { myProfile, ipfsNode, portfolio, rootHash } from "../components/stores.js";
+  import {
+    myProfile,
+    ipfsNode,
+    portfolio,
+    rootHash
+  } from "../components/stores.js";
   import Profile from "../utils/Profile.js";
 
   //  for url/path/params/query: https://sapper.svelte.dev/docs#Argument
@@ -10,8 +15,14 @@
   const { page, session } = stores();
 
   onMount(async () => {
-    const password = "my super secret pass phrase that nobody will ever guess";
-    $myProfile = await new Profile(password, $rootHash);
+    if (typeof window !== "undefined" && localStorage.getItem("myProfile") ) {
+      $myProfile = localStorage.getItem("myProfile", JSON.parse($myProfile));
+    } else {
+      const password = String("password 1 2... " + Math.random() + Date.now());
+      console.log(`Profile password is: ${password}`)
+      $myProfile = await new Profile(password, $rootHash);
+      localStorage.setItem("myProfile", JSON.stringify($myProfile));
+    }
   });
 </script>
 
@@ -59,10 +70,13 @@
       class="logo"
       src="P.png" />
     <h1 class="title">PeerPiper.io</h1>
-    <h2 class="title">Getting data from the people who have it, to the people who need it.</h2>
+    <h2 class="title">
+      Getting data from the people who have it, to the people who need it.
+    </h2>
   </center>
   <p class="description">
-    Save your data in one spot, then pipe out to your selected peers groups unlimited times.
+    Save your data in one spot, then pipe out to your selected peers groups
+    unlimited times.
     <br />
     Connect with friends and businesses to automagically sync data for easier
     life and better christmas gifts.

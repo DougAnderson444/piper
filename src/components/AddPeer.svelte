@@ -32,9 +32,10 @@
       const legit = verifySignature(msgObj.data, msgObj.sig, msg.topicIDs[0]);
 
       if (legit) {
-        console.log(`LEGIT in AddPeer.svelte, save: ${JSON.stringify(msgObj.data)} `); //MC Hammer
+        console.log(`LEGIT in AddPeer.svelte, save: ${msg.topicIDs[0]} \n/ ${JSON.stringify(msgObj.data)} `); //MC Hammer
         savePeerToRoot($root, msg.topicIDs[0], msgObj.data);
         $root = $root; // to update the store
+        console.log(`root is now \n ${JSON.stringify($root,null,2)}`)
       } else {
         console.log(`NOT LEGIT, QUIT: ${legit} `); //MC Hammer
       }

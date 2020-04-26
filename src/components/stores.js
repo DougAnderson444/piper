@@ -44,18 +44,25 @@ let defObj = {
   Contacts: {}
 };
 export const defaultObj = writable(defObj); //createRoot();
-export const root = writable(defObj); //createRoot();
+export const root = writable(0); //createRoot();
 
 //Derives a store from one or more other stores. Whenever those dependencies change, the callback runs.
 export const rootHash = derived([root, ipfsNode], ([$root, $ipfsNode], set) => {
-  if ($ipfsNode != 0) {
+  if ($ipfsNode != 0 && $root != 0) {
     try {
       $ipfsNode.dag
         .put(JSON.parse(JSON.stringify($root)), { pin: true })
         .then(h => {
-          set(h);
-          typeof window !== "undefined" && h != 0
-            ? localStorage.setItem("rootHash", h)
+          set(h.toString());
+          console.log(`> stores updated ipfsNode with \n${JSON.stringify(
+            $root,
+            null,
+            2
+          )}\n>> set $rootHash to \n
+            ${JSON.stringify(h.toString(), null, 2)}
+          `);
+          typeof window !== "undefined" && h.toString() != 0
+            ? localStorage.setItem("rootHash", h.toString())
             : false;
           // save the rootHash to localstorage every time it changes (using $: in svelte)
         });

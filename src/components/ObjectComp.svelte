@@ -1,10 +1,13 @@
 <script>
   //import KeyValue from "./KeyValue.svelte";
+  /*
+  This runs when the folder is opened
+  */
   import ShowKey from "./ShowKey.svelte";
   import ShowValue from "./ShowValue.svelte";
   import EditableText from "./EditableText.svelte";
   import Menu from "./Menu.svelte";
-  import { root, ipfsNode } from "./stores.js";
+  import { ipfsNode } from "./stores.js";
   import IPFS from "ipfs";
 
   export let breadcrumbs = [];
@@ -12,21 +15,17 @@
   export let val;
   export let expanded = false;
   let isCID, contactsData;
-  console.log(`key=${key} \n val=${JSON.stringify(val)}`);
 
   // preprocess value
   if (val.hasOwnProperty('/') && IPFS.isIPFS.cid(val['/'])) {
-    console.log(`1. IS CID: ${JSON.stringify(val)}`);
     isCID = true;
-  } else {
-    console.log(`1. Folder opened, key=${key} not CID: ${JSON.stringify(val)}`);
   }
 
   if (isCID) {
     (async () => {
       try {
         contactsData = (await $ipfsNode.dag.get(val['/'])).value;
-        console.log(`contactsData: ${contactsData}`);
+        console.log(`contactsData: ${val['/']} \n  ${JSON.stringify(contactsData, null,2)}`);
       } catch (err) {
         console.log(err);
       }
@@ -36,6 +35,7 @@
   function toggle() {
     expanded = !expanded;
   }
+  //.sort()
 </script>
 
 <style>
