@@ -108,6 +108,16 @@
      */
     $ipfsNode = await IPFS.create(options);
     console.log(`ipfs node ready \n ${$ipfsNode}`);
+
+    // /ip4/142.120.58.162/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk
+    const multiaddr =  "/ip4/127.0.0.1/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk"
+    //const multiaddr = "/ip4/142.120.58.162/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk";
+    try{
+      await $ipfsNode.swarm.connect(multiaddr)
+    }catch(e){
+      console.log(e)
+    }
+
     $start = new Date();
 
     const { id, agentVersion, protocolVersion } = await $ipfsNode.id();
