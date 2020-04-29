@@ -54,13 +54,8 @@ export const rootHash = derived([root, ipfsNode], ([$root, $ipfsNode], set) => {
         .put(JSON.parse(JSON.stringify($root)), { pin: true })
         .then(h => {
           set(h.toString());
-          console.log(`> stores updated ipfsNode with \n${JSON.stringify(
-            $root,
-            null,
-            2
-          )}\n>> set $rootHash to \n
-            ${JSON.stringify(h.toString(), null, 2)}
-          `);
+          console.log(`> stores updated\n
+          set $rootHash to ${JSON.stringify(h.toString(), null, 2)}`);
           typeof window !== "undefined" && h.toString() != 0
             ? localStorage.setItem("rootHash", h.toString())
             : false;

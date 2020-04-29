@@ -110,10 +110,11 @@
     console.log(`ipfs node ready \n ${$ipfsNode}`);
 
     // /ip4/142.120.58.162/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk
-    const multiaddr =  "/ip4/127.0.0.1/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk"
-    //const multiaddr = "/ip4/142.120.58.162/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk";
+    //const multiaddr =  "/ip4/127.0.0.1/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk"
+    const multiaddr = "/dns4/super.peerpiper.io/tcp/4003/ws/ipfs/QmPFeUqE4x17gy6cV3bb9yjfiZvwPAtmwmt4zZqgnfEoz5";
     try{
       await $ipfsNode.swarm.connect(multiaddr)
+      console.log(`Connected to ${multiaddr}`)
     }catch(e){
       console.log(e)
     }
@@ -202,7 +203,7 @@
       k["key " + i] = "not set yet";
       $testRoots[i] = (await getCID(k)).toString();
       $testRoots = $testRoots;
-      console.log(`test profile ${i} rootHash set to ${$testRoots[i]}`);
+      //console.log(`test profile ${i} rootHash set to ${$testRoots[i]}`);
       let temp = await new Profile(password, $testRoots[i]);
       $testProfiles = [...$testProfiles, temp]; // copy to stores
       $testRoots[i] = {

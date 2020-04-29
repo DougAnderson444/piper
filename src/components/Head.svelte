@@ -18,9 +18,7 @@
     QRCode.toCanvas(canvas, $myProfile.publicKey); // Draws qr code symbol to canvas.
     visible = !visible;
   }
-  //on:mousemove={visible = !visible}
-  //    <AddPeer />
-  $: console.log(`myProfile ${JSON.stringify($myProfile)}`)
+
 </script>
 
 <style>
