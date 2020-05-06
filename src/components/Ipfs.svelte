@@ -88,6 +88,12 @@
 
     const options = {
       repo: repo, // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
+      relay: {
+        enabled: true,
+        hop: {
+          enabled: true
+        }
+      },      
       pass: password, //, // https://github.com/ipfs/js-ipfs/issues/1138
       libp2p: {
         config: {
@@ -111,7 +117,7 @@
 
     // /ip4/142.120.58.162/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk
     //const multiaddr =  "/ip4/127.0.0.1/tcp/4003/ws/ipfs/QmRjDcnT5YBSg36Yzn5c4u63rkNTQyL2eGd5Ln3NvMTkzk"
-    const multiaddr = "/dns4/super.peerpiper.io/tcp/4003/ws/ipfs/QmPFeUqE4x17gy6cV3bb9yjfiZvwPAtmwmt4zZqgnfEoz5";
+    const multiaddr = "/dns4/super.peerpiper.io/tcp/4033/wss/ipfs/QmPFeUqE4x17gy6cV3bb9yjfiZvwPAtmwmt4zZqgnfEoz5";
     try{
       await $ipfsNode.swarm.connect(multiaddr)
       console.log(`Connected to ${multiaddr}`)

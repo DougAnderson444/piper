@@ -47,6 +47,12 @@
 
     const options = {
       repo: repo, // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data, String(Math.random() + Date.now())
+      relay: {
+        enabled: true,
+        hop: {
+          enabled: true
+        }
+      },
       pass: "", //, // https://github.com/ipfs/js-ipfs/issues/1138
       init: {
         // only runs initially
@@ -64,7 +70,7 @@
     nodeid = id;
 
     const multiaddr =
-      "/dns4/super.peerpiper.io/tcp/4003/ws/ipfs/QmPFeUqE4x17gy6cV3bb9yjfiZvwPAtmwmt4zZqgnfEoz5";
+      "/dns4/super.peerpiper.io/tcp/4033/wss/ipfs/QmPFeUqE4x17gy6cV3bb9yjfiZvwPAtmwmt4zZqgnfEoz5";
     console.log(`Conect to remote Go node \n ${multiaddr}`);
     try {
       await node.swarm.connect(multiaddr);
@@ -75,10 +81,11 @@
     await node.pubsub.subscribe(
       topic,
       msg => {
+        // The `msg` has the format `{from: String, seqno: Buffer, data: Buffer, topicIDs: Array<String>}`
         const from = msg.from;
         const seqno = msg.seqno.toString("hex");
         if (from !== id) {
-          console.log(`Message ${seqno} from ${from}:`);
+          console.log(`${(new Date(Date.now()).toLocaleString())} Message ${seqno} from ${from}:`);
           try {
             console.log(JSON.stringify(msg.data.toString(), null, 2));
           } catch (_) {
