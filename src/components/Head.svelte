@@ -5,7 +5,7 @@
   // https://cweili.github.io/svelte-fa/
   //import Fa from "svelte-fa";
   //import { faFlag, faPlus, faCertificate, faUserCheck, faEllipsisH, faAngleUp, faQrcode, faCopy, faLink } from "@fortawesome/free-solid-svg-icons";
-  import { myProfile, testProfiles } from "./stores.js";
+  import { myProfile } from "./stores.js";
   import Clipboard from "./Clipboard.svelte";
 
   //var QRCode = require('qrcode')
@@ -62,18 +62,5 @@
     width={32}
     height={32} />
   <br />
-  Add test friends
- 
-  {#if $testProfiles != []}
-    {#each $testProfiles as test, index}
-       <br />{index + 1}:
-      <span class="peerspan">
-        {test.publicKey}
-        <Clipboard value={test.publicKey} />
-        <br />
-      </span>
-    {/each}
-  {/if}
-
   <hr />
 {/if}

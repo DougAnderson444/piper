@@ -3,6 +3,7 @@
   "description": "Sapper app deployed to Zeit Now",
   "version": "1.0.1",
   "scripts": {
+    "now": "now dev",
     "start": "sapper dev",
     "dev": "sapper dev --port 3000",
     "build": "sapper export",

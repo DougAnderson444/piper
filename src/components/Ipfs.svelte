@@ -17,9 +17,7 @@
     start,
     root,
     rootHash,
-    myProfile,
-    testProfiles,
-    testRoots
+    myProfile
   } from "./stores.js";
 
   import { createKeyPair, signMessage, verifySignature } from "./pkiHelper.js";
@@ -187,7 +185,6 @@
 				PeerID: peerId.toB58String(),
 				PrivKey: peerId.privKey.bytes.toString('base64')
 		*/
-    // test if signature with this private key matches the Public key from the peerid
 
     const stats = await $ipfsNode.repo.stat();
     //console.log(`Repo stats: `,stats)
@@ -198,39 +195,6 @@
 
     //const pem = await $ipfsNode.key.export('self', password)   // key is for ipns
     //console.log(`pem is: \n `,pem)
-
-    /*
-     * setup some test publicmyProfile, and pub responses
-     * make a few public myProfile
-     */
-    for (let i = 0; i < 3; i++) {
-      const password = String(Math.random() + Date.now() + i);
-      let k = {};
-      k["key " + i] = "not set yet";
-      $testRoots[i] = (await getCID(k)).toString();
-      $testRoots = $testRoots;
-      //console.log(`test profile ${i} rootHash set to ${$testRoots[i]}`);
-      let temp = await new Profile(password, $testRoots[i]);
-      $testProfiles = [...$testProfiles, temp]; // copy to stores
-      $testRoots[i] = {
-        cid: (await getCID({
-          "This profile's publicKey": temp.publicKey
-        })).toString()
-      };
-      $testRoots = $testRoots;
-
-      // what to do when test ping rx'd
-      let receiveTestMsg = msg => {
-        if (msg.data.toString() == PING_TEXT) {
-          const msgString = String(temp.rootHash); //String("hash for " + msg.topicIDs[0]); //JSON.stringify(msgObj)
-          publish($ipfsNode, temp, msgString); //respond using this profile's keypair, sign the response msg
-        }
-      };
-
-      // listen for msgs
-      subscr($ipfsNode, temp.publicKey, receiveTestMsg);
-    }
-    $testProfiles = $testProfiles;
   });
 
   // end onMount

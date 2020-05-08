@@ -7,8 +7,6 @@ export const nodeId = writable(0);
 export const nodeAgentVersion = writable(0);
 export const nodeProtocolVersion = writable(0);
 export const myProfile = writable(0); // public and private key object
-export const testProfiles = writable([]); // public and private key object
-export const testRoots = writable([]); // public and private key object
 
 // start function is called when the store gets its first subscriber;
 export const time = readable(new Date(), function start(set) {

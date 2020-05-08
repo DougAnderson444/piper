@@ -13,6 +13,7 @@
   //  for url/path/params/query: https://sapper.svelte.dev/docs#Argument
   import { stores } from "@sapper/app";
   const { page, session } = stores();
+  export let date;
 
   onMount(async () => {
     if (typeof window !== "undefined" && localStorage.getItem("myProfile") ) {
@@ -23,6 +24,11 @@
       $myProfile = await new Profile(password, $rootHash);
       localStorage.setItem("myProfile", JSON.stringify($myProfile));
     }
+
+    const res = await fetch("/api/date");
+    const newDate = await res.text();
+    date = newDate;
+
   });
 </script>
 
@@ -101,3 +107,6 @@
 <p>Query is: {JSON.stringify($page.query)}</p>
 <p>Query is: {JSON.stringify($page.query.user)}</p>
 -->
+  <br />
+  <h2>The date according to Node.js is:</h2>
+  <p>{date ? date : 'Loading date...'}</p>
