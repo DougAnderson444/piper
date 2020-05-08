@@ -1,3 +1,5 @@
+//const sapperEnv = require('sapper-environment');
+
 module.exports = (req, res) => {
     /*
         res.json({
@@ -6,7 +8,7 @@ module.exports = (req, res) => {
         cookies: req.cookies,
     });
     */
-  const date = new Date().toString();
+  const date = new Date().toString() + " "+ process.env.SAPPER_APP_TEST;
   res.status(200).send(date);
 };
 

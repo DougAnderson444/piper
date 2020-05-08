@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const config = require('sapper/config/webpack.js');
 const pkg = require('./package.json');
+const sapperEnv = require('sapper-environment');
 
 const mode = process.env.NODE_ENV;
 const dev = mode === 'development';
@@ -43,6 +44,7 @@ module.exports = {
 			// pending https://github.com/sveltejs/svelte/issues/2377
 			// dev && new webpack.HotModuleReplacementPlugin(),
 			new webpack.DefinePlugin({
+				...sapperEnv(),
 				'process.browser': true,
 				'process.env.NODE_ENV': JSON.stringify(mode)
 			}),

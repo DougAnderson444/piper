@@ -7,7 +7,7 @@
     "start": "sapper dev",
     "dev": "sapper dev --port 3000",
     "build": "sapper export",
-    "export": "sapper export",
+    "export": "sapper export SAPPER_TIMESTAMP=$(date +%s%3N)",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
     "test": "run-p --race dev cy:run"
@@ -22,6 +22,7 @@
     "polka": "next",
     "pouchdb": "^7.2.1",
     "qrcode": "^1.4.4",
+    "sapper-environment": "^1.0.1",
     "sirv": "^0.4.0",
     "svelte-click-outside": "^1.0.0",
     "svelte-closable": "0.0.0",
