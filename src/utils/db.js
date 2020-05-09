@@ -1,28 +1,26 @@
 import PouchDB from "pouchdb";
 
 var localDB = new PouchDB("mypeerdb");
-var remoteDB = new PouchDB("https://super.peerpiper.io:5999/peers", {
-  skip_setup: true,
-});
+const remoteDB = (async()=> await fetch("/api/getRemoteDb"))();
 
 export async function put(doc) {
   try {
-    localDB.put(doc, {force: true});
+    localDB.put(doc, { force: true });
     return true;
   } catch (err) {
-      console.log(err)
+    console.log(err);
     return err;
   }
 }
 
 export async function get(id) {
-    try {
-      let i = await localDB.get(id);
-      return i;
-    } catch (err) {
-        console.log(err)
-      return err;
-    }
+  try {
+    let i = await localDB.get(id);
+    return i;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
 }
 export async function getInfo() {
   let info = await localDB.info();
@@ -32,7 +30,9 @@ export async function getInfo() {
 export async function getRemoteDBInfo() {
   let info;
   try {
-    info = await remoteDB.info();
+    info = await (await remoteDB).info();
+    console.log(`remoteDB: ${JSON.stringify(info)}`)
+    //console.log(JSON.stringify(remoteDB));
     return info;
   } catch (err) {
     console.log(err);
