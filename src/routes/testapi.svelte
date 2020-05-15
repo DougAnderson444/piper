@@ -57,6 +57,11 @@
       let stringToUse = `DNS Link for ${username} is ${username}.peerpiper.io which points to this file.`;
       (async () => {
         var addedFileHash;
+        /* Doesn't resolve...
+        const cidVal = await $ipfsNode.dag.put({data: stringToUse}); //use DAG for object storage
+        addedFileHash = cidVal.toString() //console.log(`${JSON.stringify(data)} CID= ${JSON.stringify()}`)
+        */
+        //or 
         for await (const { cid } of $ipfsNode.add(stringToUse)) {
           console.log(`cid is ${cid}`);
           addedFileHash = cid.toString();

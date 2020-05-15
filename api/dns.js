@@ -18,6 +18,8 @@ module.exports = async (req, res) => {
   console.log(`POST response is: `);
   console.log(resp.uid);
 
+  //TODO: Get old record id and delete it (it's obsolete now!)
+
   res.send(resp.uid); //json(resp) //.status(200).send(date);
 };
 
@@ -33,3 +35,10 @@ async function postData(url = "", data = {}) {
   });
   return await response.json(); // parses JSON response into native JavaScript objects
 }
+
+/** https://developers.cloudflare.com/1.1.1.1/dns-over-https/json-format/
+ * curl -H 'accept: application/dns-json' 'https://cloudflare-dns.com/dns-query?name=example.com&type=AAAA' | json_pp
+ * 
+ * curl -H 'accept: application/dns-json' 'https://cloudflare-dns.com/dns-query?name=user6198428.peerpiper.io&type=TXT' | json_pp
+ * 
+ */
