@@ -8,15 +8,14 @@ module.exports = async (req, res) => {
     type: "TXT",
     value: dnslinkurl,
   };
-  console.log(`Dev token is ${process.env.SAPPER_APP_DNSTOKEN}`);
+  //console.log(`Dev token is ${process.env.SAPPER_APP_DNSTOKEN}`);
   //console.log(`DNS object is is \n ${JSON.stringify(dataObj)}`);
 
   const resp = await postData(
     "https://api.zeit.co/v2/domains/peerpiper.io/records",
     dataObj
   );
-  console.log(`POST response is: `);
-  console.log(resp.uid);
+  console.log(`POST response is: ` + resp.uid);
 
   //TODO: Get old record id and delete it (it's obsolete now!)
 

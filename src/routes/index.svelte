@@ -9,26 +9,43 @@
     rootHash
   } from "../components/stores.js";
   import Profile from "../utils/Profile.js";
+  import { generatePBK } from "../components/pkiHelper.js";
 
   //  for url/path/params/query: https://sapper.svelte.dev/docs#Argument
   import { stores } from "@sapper/app";
   const { page, session } = stores();
   export let date;
 
+  let mounted = false;
+  let indexNum = $page.query.indexNum || "";
+
   onMount(async () => {
-    if (typeof window !== "undefined" && localStorage.getItem("myProfile") ) {
+    mounted = true;
+
+    if (typeof window !== "undefined" && localStorage.getItem("myProfile")) {
       $myProfile = JSON.parse(localStorage.getItem("myProfile"));
     } else {
-      const password = String("password 1 2... " + Math.random() + Date.now());
-      console.log(`Profile password is: ${password}`)
-      $myProfile = await new Profile(password, $rootHash);
+      const username = "demo";
+      const handle = username + indexNum; // handle/subdomain name, demo.peerpiper.io
+      let password = generatePBK("password123", handle, username); //String("password123" + handle) // + Math.random() + Date.now());
+      $myProfile = await new Profile(password, $rootHash, handle);
+      // Publish PublicKey to DIDDoc
+      // ipfs.add([file1, file2], { wrapWithDirectory: true }) // add multiple files via an array
+      const DEFAULT_CONTEXT = 'https://w3id.org/did/v1';
+      let did = `did:ppid:${username}.peerpiper.io`
+      let didDoc = {
+        "@context": DEFAULT_CONTEXT,
+        id: did,
+        created: new Date().toISOString()
+      };
+      $ipfsNode.add(didDoc, { wrapWithDirectory: true });
+
       localStorage.setItem("myProfile", JSON.stringify($myProfile));
     }
 
     const res = await fetch("/api/date");
     const newDate = await res.text();
     date = newDate;
-
   });
 </script>
 
@@ -74,14 +91,15 @@
       height="150"
       layout="fixed"
       class="logo"
-      src="P.png" />
+      src="p-150x150.png" />
     <h1 class="title">PeerPiper.io</h1>
     <h2 class="title">
-      Getting data from the people who have it, to the people who need it.
+      Getting data directly from the people who have it to the people who need
+      it.
     </h2>
   </center>
   <p class="description">
-    Save your data in one spot, then pipe out to your selected peers groups
+    Save your data in this browser, then pipe out to your selected peers groups
     unlimited times.
     <br />
     Connect with friends and businesses to automagically sync data for easier
@@ -92,7 +110,9 @@
   </p>
 </div>
 
-<IpfsComp />
+{#if mounted}
+  <IpfsComp />
+{:else}Awaiting mount...{/if}
 <br />
 <br />
 {#if $ipfsNode}
@@ -107,6 +127,6 @@
 <p>Query is: {JSON.stringify($page.query)}</p>
 <p>Query is: {JSON.stringify($page.query.user)}</p>
 -->
-  <br />
-  <h2>The date according to Node.js is:</h2>
-  <p>{date ? date : 'Loading date...'}</p>
+<br />
+<h2>The date according to Node.js is:</h2>
+<p>{date ? date : 'Loading date...'}</p>

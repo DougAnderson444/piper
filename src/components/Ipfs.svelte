@@ -104,7 +104,8 @@
       init: {
         // only runs initially
         privateKey: privKey // (base64 PrivKey) string or full PeerId, A pre-generated private key to use. Can be either a base64 string or a PeerId instance.
-      }
+      },
+      pass: "01234567890123456789" // https://github.com/ipfs/js-ipfs/issues/1891
     };
 
     /*
@@ -251,11 +252,11 @@
 <div class="outer">
   {#if $nodeId}
     <div transition:slide={{ delay: 100, duration: 750 }}>
-      <h2>Your node is running in the browser.</h2>
+      <h2>PeerPiper is now running in the browser.</h2>
       <p>
+      <!--
         <b>
-          View your data in web 3.0'land (kinda like a blockchain, but
-          different):
+          View your data in Web 3.0 (like the blockchain, but different):
         </b>
         <br />
         <a
@@ -266,7 +267,9 @@
         </a>
       </p>
       <QRCode value={`https://explore.ipld.io/#/explore/${$rootHash}`} />
-      <p>Browser nodeID: {$nodeId}</p>
+      <p>Browser nodeID: {$nodeId}
+      -->
+      </p>
     </div>
   {:else}
     <div transition:slide={{ delay: 100, duration: 750 }}>

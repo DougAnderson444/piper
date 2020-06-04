@@ -16,7 +16,10 @@
   var remoteDB = new PouchDB("https://super.peerpiper.io:5999/peers");
   let date;
   let username;
+  let mounted = false;
+
   onMount(async () => {
+    mounted = true;
     //init the databases
     info = await localDB.info();
     rinfo = await remoteDB.info();
@@ -29,8 +32,8 @@
     const resText = await res.text();
     console.log(resText);
     date = resText;
-    let id = JSON.parse(resText).id;
-    username = id.substring(id.lastIndexOf(":") + 1);
+    let id = JSON.parse(resText).id; // pouchDB response is "id":"org.couchdb.user:user3501306"
+    username = id.substring(id.lastIndexOf(":") + 1); // trim the org.couchdb.user: from the front
     console.log(username);
 
     // now try to write to this user's database
@@ -61,7 +64,7 @@
         const cidVal = await $ipfsNode.dag.put({data: stringToUse}); //use DAG for object storage
         addedFileHash = cidVal.toString() //console.log(`${JSON.stringify(data)} CID= ${JSON.stringify()}`)
         */
-        //or 
+        //or
         for await (const { cid } of $ipfsNode.add(stringToUse)) {
           console.log(`cid is ${cid}`);
           addedFileHash = cid.toString();
@@ -104,4 +107,6 @@ Date:
 <br />
 {username}
 <hr />
-<IpfsComp />
+{#if mounted}
+  <IpfsComp />
+{/if}

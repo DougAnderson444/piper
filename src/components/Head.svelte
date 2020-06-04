@@ -41,8 +41,8 @@
 {#if $myProfile}
   Connect using:
   <span class="peerspan">
-    {$myProfile.publicKey}
-    <Clipboard value={$myProfile.publicKey} />
+    {$myProfile.url}
+    <Clipboard value={$myProfile.url} />
   </span>
   <span
     on:mouseover={() => {

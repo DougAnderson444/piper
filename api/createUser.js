@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
   // saved at: https://vercel.com/douganderson444/peersapper/settings and .env for development
 
   var username = 'user'+Math.floor(Math.random()*10000000)
-  const purl = `${process.env.SAPPER_APP_USERDB}/org.couchdb.user:${username}`
+  const purl = `${process.env.SAPPER_APP_USERDB}/org.couchdb.user:${username}`; // pouch profile URL
   var data = {
     _id: `org.couchdb.user:${username}`,
     name: username,
