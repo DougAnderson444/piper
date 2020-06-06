@@ -172,7 +172,8 @@
       for await (const name of $ipfsNode.name.resolve(peerId.toJSON().id)) {
         console.log(name);
         // /ipfs/QmQrX8hka2BtNHa8N8arAq16TCVx5qHcb46c5yPewRycLm
-        console.log(`resolves to https://explore.ipld.io/#/explore/${name}`);
+        let cidStr = name.replace(/^\/ipfs\//, "");
+        console.log(`resolves to https://explore.ipld.io/#/explore/${cidStr}`);
       }
     } catch (err) {
       console.log(err);
