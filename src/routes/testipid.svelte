@@ -1,94 +1,95 @@
 <script>
-  import { onMount } from "svelte";
-  import IpfsComp from "../components/Ipfs.svelte";
-  import { ipfsNode } from "../components/stores.js";
-  import createIpid, { getDid } from "did-ipid";
-  import { jwk2pem } from "pem-jwk";
-  import IPFS from "ipfs";
+  import { onMount } from 'svelte'
+  import IpfsComp from '../components/Ipfs.svelte'
+  import { resolve } from '../components/Ipfs.js'
+  import { ipfsNode } from '../components/stores.js'
+  import createIpid, { getDid } from 'did-ipid'
+  import { jwk2pem } from 'pem-jwk'
+  import IPFS from 'ipfs'
 
-  let mounted = false;
-  let ipid, peerId;
-  var pem;
+  let mounted = false
+  let ipid, peerId
+  var pem, content
+  export let did
 
-  let repo = "ipfs-" + Math.floor(Math.random() * Math.floor(1048575));
+  let repo = 'ipfs-' + Math.floor(Math.random() * Math.floor(1048575))
 
   // For when I can crypto.keys.import/export Ed25519 keys
   async function testEd25519() {
-    let start = Date.now();
-    console.log(`Start ${start}`);
-    var tld = "tld";
-    var username = "username";
-    let password, salt, iterations, keySize, hash;
-    password = "password";
-    salt = `${tld}${username}`;
-    iterations = 10000;
-    keySize = 32;
-    hash = "sha2-256";
+    let start = Date.now()
+    console.log(`Start ${start}`)
+    var tld = 'tld'
+    var username = 'username'
+    let password, salt, iterations, keySize, hash
+    password = 'password'
+    salt = `${tld}${username}`
+    iterations = 10000
+    keySize = 32
+    hash = 'sha2-256'
     var derivedKey = IPFS.crypto.pbkdf2(
       password,
       salt,
       iterations,
       keySize,
-      hash
-    );
+      hash,
+    )
 
-    const bits = 256;
+    const bits = 256
     // seed is a 32 byte uint8array
-    var buf = Buffer.from(derivedKey, "utf8");
-    var seed = await IPFS.multihashing.digest(buf, "sha2-256");
+    var buf = Buffer.from(derivedKey, 'utf8')
+    var seed = await IPFS.multihashing.digest(buf, 'sha2-256')
     //var decoded = IPFS.multihash.decode(encoded).digest
-    console.log(`IPFS Seed: \n${seed.toString("base64")}\n`);
+    console.log(`IPFS Seed: \n${seed.toString('base64')}\n`)
 
     var ed25519PrivateKey = await IPFS.crypto.keys.generateKeyPairFromSeed(
-      "ed25519",
+      'ed25519',
       seed,
-      bits
-    ); // returns Ed25519PrivateKey
-    var b64pk = Buffer.from(ed25519PrivateKey.bytes).toString("base64");
-    console.log("mockEd25519PrivateKey: \n" + b64pk);
+      bits,
+    ) // returns Ed25519PrivateKey
+    var b64pk = Buffer.from(ed25519PrivateKey.bytes).toString('base64')
+    console.log('mockEd25519PrivateKey: \n' + b64pk)
 
-    IPFS.PeerId.createFromPrivKey(Buffer.from(b64pk, "base64")).then(id => {
-      console.log(`\n1.PeerId from password/seed: \n${id.toB58String()} \n `);
-    });
-    const peerId = await IPFS.PeerId.createFromPrivKey(ed25519PrivateKey.bytes);
+    IPFS.PeerId.createFromPrivKey(Buffer.from(b64pk, 'base64')).then((id) => {
+      console.log(`\n1.PeerId from password/seed: \n${id.toB58String()} \n `)
+    })
+    const peerId = await IPFS.PeerId.createFromPrivKey(ed25519PrivateKey.bytes)
     //.then(peerId => {
-    console.log(
-      `\n2.PeerId from password/seed: \n${peerId.toB58String()}  \n `
-    );
+    console.log(`\n2.PeerId from password/seed: \n${peerId.toB58String()}  \n `)
     //});
 
-    console.log(`End ${Date.now() - start} ms`);
+    console.log(`End ${Date.now() - start} ms`)
 
     let options = {
       repo: repo, // default is "ipfs", string or ipfs.Repo instance, file path at which to store the IPFS node’s data
       init: {
-        privateKey: peerId
+        privateKey: peerId,
       },
-      pass: seed.toString("base64") //"01234567890123456789" // https://github.com/ipfs/js-ipfs/issues/1891
-    };
+      pass: seed.toString('base64'), //"01234567890123456789" // https://github.com/ipfs/js-ipfs/issues/1891
+    }
 
-    console.log(`peerid.privKey`, peerId.privKey);
+    console.log(`peerid.privKey`, peerId.privKey)
     try {
-      const node = await IPFS.create(options);
+      const node = await IPFS.create(options)
 
-      await node.start();
-      await node.stop();
+      await node.start()
+      await node.stop()
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
   }
 
   onMount(async () => {
-    mounted = true;
-    console.log("mounted");
+    mounted = true
+    console.log('mounted')
 
-    peerId = await IPFS.PeerId.create({ bits: 2048, keyType: "rsa" }); // create PeerId
-    let jwk = peerId.privKey._key; 
-    pem = jwk2pem(jwk); // RSA-pem required for keychain
+    /*
+
+    peerId = await IPFS.PeerId.create({ bits: 2048, keyType: 'rsa' }) // create PeerId
+    let jwk = peerId.privKey._key
+    pem = jwk2pem(jwk) // RSA-pem required for keychain
 
     //testEd25519();
 
-    /*
         (async function() {
       const peerId = await IPFS.PeerId.create({
         bits: 256,
@@ -123,34 +124,86 @@
     })();
 
     */
-  });
+  })
 
   $: {
-    if ($ipfsNode) {
-      let keysList;
-      (async () => {
-        console.log(`try keylist`);
+    if (
+      $ipfsNode &&
+      typeof $ipfsNode.isOnline === 'function' &&
+      $ipfsNode.isOnline()
+    ) {
+      /*
+      let keysList
+      ;(async () => {
+        console.log(`try keylist`)
 
         try {
-          keysList = await $ipfsNode.key.list();
-          console.log(keysList);
+          keysList = await $ipfsNode.key.list()
+          console.log(keysList)
         } catch (err) {
-          console.log(err);
+          console.log(err)
         }
-      })();
-      if ($ipfsNode != 0 && keysList != 0) {
-        onReady();
-      }
+      })()
+      */
+      console.log('IPFS ready')
+      onReady()
     }
   }
 
   const onReady = async () => {
     //on.ready
-    ipid = await createIpid($ipfsNode);
-    console.log("IPID ready");
+    //ipid = await createIpid($ipfsNode)
+    //console.log('IPID ready')
+
+    did = 'did:ipid:QmXBx4ckRjba4nVgXa89UGS1VhWNmCbMf9JbiDqUwCNe3k'
+  }
+
+  const handleSubmit = async () => {
+    /*
+    try {
+      const didDocument = await ipid.resolve(did)
+      console.log(`didDocument is ${JSON.stringify(didDocument, null, 2)}`)
+    } catch (err) {
+      console.log(`didDocument err ${err}`)
+    }
+    */
+    function parseDid(did) {
+      const match = did.match(/did:(\w+):(\w+).*/)
+
+      if (!match) {
+        throw new Error(did)
+      }
+
+      return { method: match[1], identifier: match[2] }
+    }
+
+    console.log(`did is ${did}`)
+    const { identifier } = parseDid(did)
+    console.log(`identifier is ${identifier}`)
+
+    let cidStr
+    try {
+      cidStr = await resolve($ipfsNode, identifier)
+      console.log(`cidStr is ${cidStr}`)
+    } catch (err) {
+      if (err.code === 'INVALID_DOCUMENT') {
+        throw err
+      }
+
+      throw new Error(`Unable to resolve document with DID: ${did}`)
+    }
+    try {
+      const resp = await this.$ipfsNode.dag.get(cidStr)
+      content = resp.value
+      console.log(JSON.stringify(content, null, 2))
+
+    } catch (err) {
+      console.log(err)
+    }
 
     //=> Creates a new DID and the corresponding DID Document based on the provided private key pem.
     //=> The DID Document is published with the added publicKey, authentication and service.
+    /*
     const didDocument = await ipid.create(pem, document => {
       const publicKey = document.addPublicKey({
         type: "RsaVerificationKey2018",
@@ -178,12 +231,28 @@
     } catch (err) {
       console.log(err);
     }
-  };
-
+    */
+  }
 </script>
 
 {#if mounted}
-  
+
   <IpfsComp />
-  
+  <br />
 {/if}
+
+<div>
+
+  <form on:submit|preventDefault={handleSubmit}>
+    <h2>Resolve an DID/IPID/IPNS name</h2>
+
+    <input type="text" placeholder="did:ipid:Qmxyvabc123" bind:value={did} />
+
+  </form>
+  <br />
+  {#if content}
+    <h3>Content</h3>
+    <br />
+    {content}
+  {/if}
+</div>
