@@ -3,12 +3,16 @@ const fetch = require("node-fetch"); // to make fetch work in nodejs
 module.exports = async (req, res) => {
   // process.env.SAPPER_APP_SUPERPEER
   // saved at: https://vercel.com/douganderson444/peersapper/settings and .env for development
+  /*
+    body: req.body,
+    query: req.query,
+    cookies: req.cookies
+  */
 
-  var username = 'user'+Math.floor(Math.random()*10000000)
-  const purl = `${process.env.SAPPER_APP_USERDB}/org.couchdb.user:${username}`; // pouch profile URL
+  const purl = `${process.env.SAPPER_APP_USERDB}/org.couchdb.user:${req.query.username}`; // pouch profile URL
   var data = {
-    _id: `org.couchdb.user:${username}`,
-    name: username,
+    _id: `org.couchdb.user:${req.query.username}`,
+    name: req.query.username,
     type: "user",
     roles: [],
     password: req.query.pw
@@ -21,7 +25,7 @@ module.exports = async (req, res) => {
     purl,
     data
   );
-  res.send(resp) //json(resp) //.status(200).send(date);
+  res.json(resp) //send(resp) //json(resp) //.status(200).send(date);
 };
 
 async function postData(method = "", url, data = {}) {
@@ -49,6 +53,9 @@ async function postData(method = "", url, data = {}) {
     "roles": [],
     "password": "plaintext_password"
   }'
+
+  curl -X GET "https://super.peerpiper.io:5999/_users/org.couchdb.user:user2505494"
+  -H "Authorization: Basic username:passwordINbase64" \
 
  * 
  */
