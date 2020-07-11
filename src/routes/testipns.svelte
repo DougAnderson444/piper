@@ -31,7 +31,7 @@
   export let topics, state, subs, ipfsNode, browser, server
   let timerId, timer, jsPeer, goPeer
 
-  const ipfsRef = `/ipfs/QmWCnkCXYYPP7NgH6ZHQiQxw7LJAMjnAySdoz9i1oxD5XJ`
+  const ipfsRef = `/ipfs/QmWCnkCXYYPP7NgH6ZHQiQxw7LJAMjnAySdoz9i1oxD5XJ` // Doug's random IPFS file for testing IPNS.  https://ipfs.ink/e/QmWCnkCXYYPP7NgH6ZHQiQxw7LJAMjnAySdoz9i1oxD5XJ
 
   // curl --data "stream=false&arg=QmUXmfYBBN443QqYjicMkK8F83pahB2qhRVDW3kvM1wivP" http://super.peerpiper.io:5001/api/v0/name/resolve | json_pp
 
@@ -49,8 +49,10 @@
         ).toLocaleString()} nodeJS connected to nodeGo`
         */
         found = true
+        browser += `<br/>${new Date(
+          Date.now(),
+        ).toLocaleString()} nodeJS connected to nodeGo`
       }
-      browser += `<br/>${info.addrs.toString()}<br/>`
     })
     if (!found) {
       browser += `<br/>${new Date(
@@ -109,12 +111,9 @@
     connectPeers()
     checkWS()
 
-    console.log(`Wait 1 second to ensure connected...`)
+    console.log(`Initial Resolve...`)
+    last(ipfsAPI.name.resolve(jsPeer.id, { stream: false }))
     await delay(1000)
-
-    console.log(`Resolve... (takes 60 seconds to timeout)`)
-    $start = new Date()
-    await last(ipfsAPI.name.resolve(jsPeer.id, { stream: false }))
 
     await subscribeToReceiveByPubsub(
       ipfsAPI,
@@ -158,19 +157,44 @@
       const from = msg.from
       const seqno = msg.seqno.toString('hex')
 
-      if (from === idGo)
-        return (server += `<br/>Ignoring message ${seqno} from self`)
-      server += `<br/>Message ${seqno} from ${from}:`
-      server += `<br/>Raw ${msg.data.toString()}`
+      server += `<br/>${new Date(
+        Date.now(),
+      ).toLocaleString()} \n Message ${seqno} from ${from}:`
 
       let regex = '/record/'
-      if (topicIDs[0].toString().match(regex) ? topicIDs[0].toString().match(regex).length > 0 : false) {
+      if (
+        msg.topicIDs[0].toString().match(regex)
+          ? msg.topicIDs[0].toString().match(regex).length > 0
+          : false
+      ) {
         server +=
           `<br/>${ipns.unmarshal(msg.data).sequence.toString()}. Topic: ` +
-          ipns.unmarshal(msg.data).topicIDs[0].toString()
+          msg.topicIDs[0].toString()
         server += `<br/>Value: ` + ipns.unmarshal(msg.data).value.toString()
       } else {
+        server += `<br/>Topic ${msg.topicIDs[0]}`
         server += `<br/>Regular Msg: ` + msg.data.toString()
+      }
+    }
+    function checkMessages(msg) {
+      const from = msg.from
+      const seqno = msg.seqno.toString('hex')
+
+      browser += `<br/>Message ${seqno} from ${from}:`
+
+      let regex = '/record/'
+      if (
+        msg.topicIDs[0].toString().match(regex)
+          ? msg.topicIDs[0].toString().match(regex).length > 0
+          : false
+      ) {
+        browser +=
+          `<br/>${ipns.unmarshal(msg.data).sequence.toString()}. Topic: ` +
+          msg.topicIDs[0].toString()
+        browser += `<br/>Value: ` + ipns.unmarshal(msg.data).value.toString()
+      } else {
+        browser += `<br/>Topic ${msg.topicIDs[0]}`
+        browser += `<br/>Regular Msg: ` + msg.data.toString()
       }
     }
 
@@ -178,12 +202,16 @@
     const keys = ipns.getIdKeys(b58)
     const topic = `${namespace}${base64url.encode(keys.routingKey.toBuffer())}`
 
+    await nodeJs.pubsub.subscribe(topic, checkMessages) // subscribed?
+
+    /*
     try {
       await nodeGo.pubsub.unsubscribe(topic)
     } catch (error) {
       console.log(error)
-    } 
-    console.log(`Subscribe to topic: `, topic)
+    }
+    */
+    //console.log(`Subscribe to topic: `, topic)
     await nodeGo.pubsub.subscribe(topic, checkMessage) // subscribed?
 
     await waitForPeerToSubscribe(nodeGo, topic) // confirm topic is on THEIR list  // API
@@ -195,29 +223,34 @@
     console.log(`Published to ${keyName}`, res1)
     console.log(`try CLI:\nipfs name resolve ${publicKeyJs}`)
 
+    /*
     console.log(`Wait for subscribed...`)
     $start = new Date()
-    await waitFor(() => subscribed === true, 5 * 1000)
+    await waitFor(() => {
+      nodeJs.name.publish(ipfsRef, {
+        resolve: false,
+      })
+      return subscribed === true
+    }, 30 * 1000)
+    */
 
-    console.log(`Resolve...`)
+    console.log(`Post-publish Resolve...`)
     const res2 = await last(nodeGo.name.resolve(publicKeyJs, { stream: false }))
-    console.log(`${res2} == ${ipfsRef}`, res2 == ipfsRef)
+    console.log(`${res2} == \n${ipfsRef}`, res2 == ipfsRef)
 
     let r = await nodeJs.name.publish(ipfsRef, {
       resolve: false,
     })
-    console.log(`Published again`, r)
+    console.log(`Published again (sends another pubsub message`, r)
 
-    console.log(
-      `Wait 60 seconds before resolve again... \n${new Date(Date.now())}`,
-    )
+    console.log(`Wait 10 seconds resolve...`)
     $start = new Date()
-    await delay(60500)
+    await delay(10000)
 
     console.log(`Resolve on nodeGo, again \n ${publicKeyJs} `)
     const res3 = await last(nodeGo.name.resolve(publicKeyJs, { stream: false }))
 
-    console.log(`${res3} == ${ipfsRef}`, res3 == ipfsRef)
+    console.log(`${res3} == \n${ipfsRef}`, res3 == ipfsRef)
   }
 
   // wait until a peer know about other peer to subscribe a topic
@@ -243,7 +276,7 @@
     }, retryOptions)
   }
 
-  const waitFor = async (predicate, ttl = 10e3, checkInterval = 50) => {
+  const waitFor = async (predicate, ttl = 10000, checkInterval = 50) => {
     const timeout = Date.now() + ttl
 
     while (true) {

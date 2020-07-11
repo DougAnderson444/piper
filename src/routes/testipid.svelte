@@ -193,7 +193,7 @@
       throw new Error(`Unable to resolve document with DID: ${did}`)
     }
     try {
-      const resp = await this.$ipfsNode.dag.get(cidStr)
+      const resp = await $ipfsNode.dag.get(cidStr)
       content = resp.value
       console.log(JSON.stringify(content, null, 2))
 

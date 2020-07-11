@@ -6,6 +6,8 @@ This repo is a brief example of a [PeerPiper](https://peerpiper.io/) in action, 
 
 After spending 20 years in the Navy, I moved around a lot. After missing a few importnant pieces of mail, and losing a few friends to phone number changes, I realized that I had no "personal RSS" feed to give out so that everyone could keep in touch with me. Also, in my 20 years of watching the internet, I saw company after company get gobbled up onyl to see their service disappear.
 
+I needed a data source that I owned, with an internet pointer to it, with personal APIs that I controlled and knew wouldn't go away with the latest acquisition.
+
 ## The Solution
 
 The solution is to have a browser based data feed that is 100% in control of the user. So that's what I built!
