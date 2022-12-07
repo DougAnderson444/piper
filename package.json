@@ -22,7 +22,7 @@
     "did-ipid": "^0.4.1",
     "human-crypto-keys": "^0.1.4",
     "hyperswarm": "^2.14.0",
-    "ipfs": "^0.47.0",
+    "ipfs": "^0.65.0",
     "ipfs-http-client": "^44.3.0",
     "ipns": "^0.7.3",
     "it-all": "^1.0.2",
